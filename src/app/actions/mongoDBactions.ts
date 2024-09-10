@@ -24,13 +24,11 @@ export async function testDatabaseConnection() {
 }
 
 export async function getNotes() {
-  const data = await mongoDBclient
+  return await mongoDBclient
     .db("notes")
-    .collection("notes")
+    .collection<UserNote>("notes")
     .find()
     .toArray();
-
-  return data as UserNote[];
 }
 
 export async function addNewNote({
@@ -47,11 +45,10 @@ export async function addNewNote({
 }
 
 export async function deleteNote(_id: string) {
-  const objectId = new ObjectId(_id);
   await mongoDBclient
     .db("notes")
     .collection("notes")
-    .deleteOne({ _id: objectId });
+    .deleteOne({ _id: new ObjectId(_id) });
 
   revalidatePath("/");
 }

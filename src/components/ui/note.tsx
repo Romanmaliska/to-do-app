@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { deleteNote } from "@/app/actions/mongoDBactions";
 
 import {
@@ -9,19 +8,12 @@ import {
   CardDescription,
   CardFooter,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-type NoteProps = {
-  note: {
-    _id: string;
-    tittle: string;
-    text: string;
-  };
-};
+import type { UserNoteWithStringifiedId } from "@/types/note";
 
-export default function Note({ note }: NoteProps) {
+export default function Note({ note }: { note: UserNoteWithStringifiedId }) {
   const { tittle, text, _id: id } = note;
 
   const handleDelete = async (id: string) => {
