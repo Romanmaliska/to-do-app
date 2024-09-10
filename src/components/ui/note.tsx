@@ -1,0 +1,48 @@
+"use client";
+
+import { useState } from "react";
+import { deleteNote } from "@/app/actions/mongoDBactions";
+
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+
+type NoteProps = {
+  note: {
+    _id: string;
+    tittle: string;
+    text: string;
+  };
+};
+
+export default function Note({ note }: NoteProps) {
+  const { tittle, text, _id: id } = note;
+
+  const handleDelete = async (id: string) => {
+    await deleteNote(id);
+  };
+
+  return (
+    <Card>
+      <CardHeader>{tittle}</CardHeader>
+      <CardContent>
+        <CardDescription>{text}</CardDescription>
+      </CardContent>
+      <CardFooter className="flex gap-4 place-content-end">
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={() => handleDelete(id)}
+        >
+          Delete
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+}
