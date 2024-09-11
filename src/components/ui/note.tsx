@@ -10,6 +10,7 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import UpdateNoteDialog from "@/components/updateNoteDialog";
 
 import type { UserNoteWithStringifiedId } from "@/types/note";
 
@@ -34,6 +35,7 @@ export default function Note({ note }: { note: UserNoteWithStringifiedId }) {
         >
           Delete
         </Button>
+        <UpdateNoteDialog id={id} />
       </CardFooter>
     </Card>
   );

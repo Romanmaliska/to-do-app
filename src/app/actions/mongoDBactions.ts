@@ -52,3 +52,15 @@ export async function deleteNote(_id: string) {
 
   revalidatePath("/");
 }
+
+export async function updateNote(
+  { tittle, text }: { tittle: string; text: string },
+  _id: string
+) {
+  await mongoDBclient
+    .db("notes")
+    .collection("notes")
+    .updateOne({ _id: new ObjectId(_id) }, { $set: { tittle, text } });
+
+  revalidatePath("/");
+}

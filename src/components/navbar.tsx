@@ -8,7 +8,7 @@ export default function Navbar() {
       <h1>Another Todo App</h1>
       <nav className="flex gap-4">
         <Button>Sign in</Button>
-        <Link href="/addnewnote">
+        <Link href="/addNewNote">
           <Button>Add Note</Button>
         </Link>
       </nav>

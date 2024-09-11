@@ -6,14 +6,13 @@ import type { UserNote } from "@/types/note";
 
 export default async function NotesBoard() {
   const notes: UserNote[] = await getNotes();
-
-  const notesWithStingId = notes.map((note: UserNote) => {
+  const notesWithStringId = notes.map((note: UserNote) => {
     return { ...note, _id: note._id.toString() };
   });
 
   return (
     <>
-      {notesWithStingId.map((note) => (
+      {notesWithStringId.map((note) => (
         <Note key={note._id} note={note} />
       ))}
     </>
