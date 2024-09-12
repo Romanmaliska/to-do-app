@@ -17,9 +17,7 @@ import type { UserNoteWithStringifiedId } from "@/types/note";
 export default function Note({ note }: { note: UserNoteWithStringifiedId }) {
   const { tittle, text, _id: id } = note;
 
-  const handleDelete = async (id: string) => {
-    await deleteNote(id);
-  };
+  const deleteNoteWithId = deleteNote.bind(null, id);
 
   return (
     <Card>
@@ -28,13 +26,11 @@ export default function Note({ note }: { note: UserNoteWithStringifiedId }) {
         <CardDescription>{text}</CardDescription>
       </CardContent>
       <CardFooter className="flex gap-4 place-content-end">
-        <Button
-          variant="destructive"
-          size="sm"
-          onClick={() => handleDelete(id)}
-        >
-          Delete
-        </Button>
+        <form action={deleteNoteWithId}>
+          <Button variant="destructive" size="sm">
+            Delete
+          </Button>
+        </form>
         <UpdateNoteDialog id={id} />
       </CardFooter>
     </Card>
