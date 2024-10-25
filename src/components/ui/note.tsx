@@ -17,22 +17,27 @@ import type { UserNoteWithStringifiedId } from '@/types/note';
 export default function Note({ note }: { note: UserNoteWithStringifiedId }) {
   const { tittle, text, _id: id } = note;
 
-  const deleteNoteWithId = deleteNote.bind(null, id);
-
   return (
     <Card>
       <CardHeader>{tittle}</CardHeader>
-      <CardContent>
+      <CardContent className='flex flex-col gap-4'>
         <CardDescription>{text}</CardDescription>
+        <div className="flex gap-4 place-content-end ">
+          <DeleteNoteButton id={id} />
+          <UpdateNoteDialog id={id} />
+        </div>
       </CardContent>
-      <CardFooter className="flex gap-4 place-content-end">
-        <form action={deleteNoteWithId}>
-          <Button variant="destructive" size="sm">
-            Delete
-          </Button>
-        </form>
-        <UpdateNoteDialog id={id} />
-      </CardFooter>
     </Card>
+  );
+}
+
+function DeleteNoteButton({ id }: { id: UserNoteWithStringifiedId['_id'] }) {
+  const deleteNoteWithId = deleteNote.bind(null, id);
+  return (
+    <form action={deleteNoteWithId}>
+      <Button variant="destructive" size="sm">
+        Delete
+      </Button>
+    </form>
   );
 }
