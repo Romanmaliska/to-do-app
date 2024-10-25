@@ -43,6 +43,7 @@ export default function UpdateNoteDialog({
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    console.log('values', values);
     await updateNote(values, id);
   };
 

@@ -1,12 +1,15 @@
 import { Document, WithId } from 'mongodb';
 
-export type UserNote = WithId<Document> & {
+type UserNote = {
   tittle: string;
   text: string;
+  createdAt: Date;
+  updatedAt: Date;
+  state: 'new' | 'progress' | 'done';
 };
 
-export type UserNoteWithStringifiedId = {
-  tittle: string;
-  text: string;
+export type UserNoteDocument = WithId<Document> & UserNote;
+
+export type UserNoteWithStringifiedId = UserNote & {
   _id: string;
 };

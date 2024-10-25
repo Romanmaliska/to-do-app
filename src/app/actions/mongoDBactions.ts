@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 import mongoDBclient from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 
-import type { UserNote } from '@/types/note';
+import type { UserNoteDocument } from '@/types/note';
 
 export async function testDatabaseConnection() {
   let isConnected = false;
@@ -26,7 +26,7 @@ export async function testDatabaseConnection() {
 export async function getNotes() {
   return await mongoDBclient
     .db('notes')
-    .collection<UserNote>('notes')
+    .collection<UserNoteDocument>('notes')
     .find()
     .toArray();
 }
@@ -34,11 +34,14 @@ export async function getNotes() {
 export async function addNewNote({
   tittle,
   text,
-}: Pick<UserNote, 'tittle' | 'text'>) {
-  await mongoDBclient
-    .db('notes')
-    .collection('notes')
-    .insertOne({ tittle, text });
+}: Pick<UserNoteDocument, 'tittle' | 'text'>) {
+  await mongoDBclient.db('notes').collection('notes').insertOne({
+    tittle,
+    text,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    state: 'new',
+  });
 
   revalidatePath('/');
   redirect('/');
@@ -61,6 +64,15 @@ export async function updateNote(
     .db('notes')
     .collection('notes')
     .updateOne({ _id: new ObjectId(_id) }, { $set: { tittle, text } });
+
+  revalidatePath('/');
+}
+
+export async function updateNoteState(state: string, _id: string) {
+  await mongoDBclient
+    .db('notes')
+    .collection('notes')
+    .updateOne({ _id: new ObjectId(_id) }, { $set: { state } });
 
   revalidatePath('/');
 }

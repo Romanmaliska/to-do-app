@@ -1,20 +1,14 @@
 import { getNotes } from '@/app/actions/mongoDBactions';
 
-import Note from '@/components/ui/note';
-
-import type { UserNote } from '@/types/note';
+import type { UserNoteDocument } from '@/types/note';
+import Notes from './notes';
 
 export default async function NotesBoard() {
-  const notes: UserNote[] = await getNotes();
-  const notesWithStringId = notes.map((note: UserNote) => {
+  const notes: UserNoteDocument[] = await getNotes();
+  
+  const notesWithStringId = notes.map((note) => {
     return { ...note, _id: note._id.toString() };
   });
 
-  return (
-    <>
-      {notesWithStringId.map((note) => (
-        <Note key={note._id} note={note} />
-      ))}
-    </>
-  );
+  return <Notes notesWithStringId={notesWithStringId} />;
 }
