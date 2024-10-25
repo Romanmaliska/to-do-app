@@ -1,8 +1,8 @@
-import { getNotes } from "@/app/actions/mongoDBactions";
+import { getNotes } from '@/app/actions/mongoDBactions';
 
-import Note from "@/components/ui/note";
+import Note from '@/components/ui/note';
 
-import type { UserNote } from "@/types/note";
+import type { UserNote } from '@/types/note';
 
 export default async function NotesBoard() {
   const notes: UserNote[] = await getNotes();

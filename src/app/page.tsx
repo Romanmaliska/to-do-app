@@ -1,6 +1,6 @@
-import { testDatabaseConnection } from "@/app/actions/mongoDBactions";
+import { testDatabaseConnection } from '@/app/actions/mongoDBactions';
 
-import NotesBoard from "@/components/NotesBoard";
+import NotesBoard from '@/components/NotesBoard';
 
 export default async function Home() {
   const isMongoDBAlive = await testDatabaseConnection();

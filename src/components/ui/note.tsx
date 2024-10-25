@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { deleteNote } from "@/app/actions/mongoDBactions";
+import { deleteNote } from '@/app/actions/mongoDBactions';
 
 import {
   Card,
@@ -8,11 +8,11 @@ import {
   CardDescription,
   CardFooter,
   CardHeader,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import UpdateNoteDialog from "@/components/updateNoteDialog";
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import UpdateNoteDialog from '@/components/updateNoteDialog';
 
-import type { UserNoteWithStringifiedId } from "@/types/note";
+import type { UserNoteWithStringifiedId } from '@/types/note';
 
 export default function Note({ note }: { note: UserNoteWithStringifiedId }) {
   const { tittle, text, _id: id } = note;

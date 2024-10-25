@@ -1,17 +1,16 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { updateNote } from "@/app/actions/mongoDBactions";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { updateNote } from '@/app/actions/mongoDBactions';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogClose,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Form,
   FormControl,
@@ -19,25 +18,25 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 
-import type { UserNoteWithStringifiedId } from "@/types/note";
+import type { UserNoteWithStringifiedId } from '@/types/note';
 
 const formSchema = z.object({
   tittle: z.string().min(1, {
-    message: "Tittle must be at least 1 character.",
+    message: 'Tittle must be at least 1 character.',
   }),
   text: z.string().min(3, {
-    message: "Text must be at least 3 characters.",
+    message: 'Text must be at least 3 characters.',
   }),
 });
 
 export default function UpdateNoteDialog({
   id,
 }: {
-  id: UserNoteWithStringifiedId["_id"];
+  id: UserNoteWithStringifiedId['_id'];
 }) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

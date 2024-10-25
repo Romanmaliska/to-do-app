@@ -1,20 +1,20 @@
-"use server";
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+'use server';
+import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 
-import mongoDBclient from "@/lib/mongodb";
-import { ObjectId } from "mongodb";
+import mongoDBclient from '@/lib/mongodb';
+import { ObjectId } from 'mongodb';
 
-import type { UserNote } from "@/types/note";
+import type { UserNote } from '@/types/note';
 
 export async function testDatabaseConnection() {
   let isConnected = false;
   const mongoClient = await mongoDBclient.connect();
   try {
     // Send a ping to confirm a successful connection
-    await mongoClient.db("admin").command({ ping: 1 });
+    await mongoClient.db('admin').command({ ping: 1 });
 
-    console.log(" You successfully connected to MongoDB!");
+    console.log(' You successfully connected to MongoDB!');
 
     return !isConnected;
   } catch (e) {
@@ -25,8 +25,8 @@ export async function testDatabaseConnection() {
 
 export async function getNotes() {
   return await mongoDBclient
-    .db("notes")
-    .collection<UserNote>("notes")
+    .db('notes')
+    .collection<UserNote>('notes')
     .find()
     .toArray();
 }
@@ -34,33 +34,33 @@ export async function getNotes() {
 export async function addNewNote({
   tittle,
   text,
-}: Pick<UserNote, "tittle" | "text">) {
+}: Pick<UserNote, 'tittle' | 'text'>) {
   await mongoDBclient
-    .db("notes")
-    .collection("notes")
+    .db('notes')
+    .collection('notes')
     .insertOne({ tittle, text });
 
-  revalidatePath("/");
-  redirect("/");
+  revalidatePath('/');
+  redirect('/');
 }
 
 export async function deleteNote(_id: string) {
   await mongoDBclient
-    .db("notes")
-    .collection("notes")
+    .db('notes')
+    .collection('notes')
     .deleteOne({ _id: new ObjectId(_id) });
 
-  revalidatePath("/");
+  revalidatePath('/');
 }
 
 export async function updateNote(
   { tittle, text }: { tittle: string; text: string },
-  _id: string
+  _id: string,
 ) {
   await mongoDBclient
-    .db("notes")
-    .collection("notes")
+    .db('notes')
+    .collection('notes')
     .updateOne({ _id: new ObjectId(_id) }, { $set: { tittle, text } });
 
-  revalidatePath("/");
+  revalidatePath('/');
 }
