@@ -1,4 +1,4 @@
-import { UserNoteWithStringifiedId } from '@/types/note';
+import { UserNoteWithStringifiedId } from '@/app/types/note';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -7,7 +7,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function notesDivededByState(notes: UserNoteWithStringifiedId[]) {
-  return notes.reduce(
+  const dividedNotes = notes.reduce(
     (
       acc: {
         doneNotes: UserNoteWithStringifiedId[];
@@ -27,4 +27,16 @@ export function notesDivededByState(notes: UserNoteWithStringifiedId[]) {
     },
     { doneNotes: [], inProgressNotes: [], newNotes: [] },
   );
+
+  const { doneNotes, inProgressNotes, newNotes } = dividedNotes;
+
+  return {
+    doneNotes: doneNotes.sort((a, b) => a.position - b.position),
+    inProgressNotes: inProgressNotes.sort((a, b) => a.position - b.position),
+    newNotes: newNotes.sort((a, b) => a.position - b.position),
+  };
 }
+
+export const generateId = () => {
+  return Math.random().toString(36).substring(2, 9) + Date.now().toString(36);
+};

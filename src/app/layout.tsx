@@ -4,7 +4,7 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'] });
 import clsx from 'clsx';
 
-import Navbar from '@/components/navbar';
+import Navbar from '@/app/components/navbar';
 
 export const metadata: Metadata = {
   title: 'Another Todo App',
@@ -17,7 +17,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang='en'>
       <body
         className={clsx(
           inter.className,

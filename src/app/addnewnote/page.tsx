@@ -1,12 +1,12 @@
 'use client';
 
-import { addNewNote } from '@/app/actions/mongoDBactions';
+import { addNewNote } from '@/app/actions/notesActions';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-import { Button } from '@/components/ui/button';
+import { Button } from '@/app/components/ui/button';
 import {
   Form,
   FormControl,
@@ -14,9 +14,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+} from '@/app/components/ui/form';
+import { Input } from '@/app/components/ui/input';
+import { Textarea } from '@/app/components/ui/textarea';
+import { useSearchParams } from 'next/navigation';
 
 const formSchema = z.object({
   tittle: z.string().min(1, {
@@ -32,8 +33,14 @@ export default function AddNewNotePage() {
     resolver: zodResolver(formSchema),
   });
 
+  const searchParams = useSearchParams();
+  const [position, state] = [
+    Number(searchParams.get('position')),
+    searchParams.get('state'),
+  ];
+
   function onSubmit(values: z.infer<typeof formSchema>) {
-    addNewNote(values);
+    addNewNote(values, { position, state });
   }
 
   return (

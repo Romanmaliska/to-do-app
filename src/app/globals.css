@@ -74,3 +74,16 @@ html {
     @apply bg-background text-foreground;
   }
 }
+
+::--webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar:horizontal {
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #be123c; /* Equivalent to bg-rose-900 */
+  border-radius: 1rem; /* Equivalent to rounded-xl */
+}

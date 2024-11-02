@@ -1,16 +1,16 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { updateNote } from '@/app/actions/mongoDBactions';
+import { updateNote } from '@/app/actions/notesActions';
 
-import { Button } from '@/components/ui/button';
+import { Button } from '@/app/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
+} from '@/app/components/ui/dialog';
 import {
   Form,
   FormControl,
@@ -18,11 +18,11 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+} from '@/app/components/ui/form';
+import { Input } from '@/app/components/ui/input';
+import { Textarea } from '@/app/components/ui/textarea';
 
-import type { UserNoteWithStringifiedId } from '@/types/note';
+import type { UserNoteWithStringifiedId } from '@/app/types/note';
 
 const formSchema = z.object({
   tittle: z.string().min(1, {
@@ -43,7 +43,6 @@ export default function UpdateNoteDialog({
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log('values', values);
     await updateNote(values, id);
   };
 

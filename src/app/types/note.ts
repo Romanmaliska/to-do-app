@@ -6,6 +6,7 @@ type UserNote = {
   createdAt: Date;
   updatedAt: Date;
   state: 'new' | 'progress' | 'done';
+  position: number;
 };
 
 export type UserNoteDocument = WithId<Document> & UserNote;
