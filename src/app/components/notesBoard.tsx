@@ -1,42 +1,41 @@
 'use client';
+import { useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 import {
   DragEndEvent,
+  DragOverEvent,
   DragOverlay,
   DragStartEvent,
   PointerSensor,
 } from '@dnd-kit/core';
-
-import { generateId, notesDivededByState } from '@/app/lib/utils';
-import { useMemo, useState } from 'react';
-import { createPortal } from 'react-dom';
-import { Button } from './ui/button';
 import { DndContext, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext } from '@dnd-kit/sortable';
 
-import type { UserNoteWithStringifiedId } from '@/app/types/note';
+import { generateId } from '@/app/lib/utils';
 import NotesColumn from './notesColumn';
+import { Button } from './ui/button';
+
+import type { UserNoteWithStringifiedId } from '@/app/types/note';
+import Note from './note';
 
 export default function NotesBoard({
   notesWithStringId,
 }: {
   notesWithStringId: UserNoteWithStringifiedId[];
 }) {
+  const [notes, setNotes] = useState<any>([]);
+
   const [columns, setColumns] = useState<
     { columnTitle: string; columnId: string }[]
   >([]);
-
   const columnsIds = useMemo(
     () => columns.map((col) => col.columnId),
     [columns],
   );
 
-  const [notes, setNotes] = useState<any>([]);
-
-  console.log(notes);
-  console.log(columns);
-
   const [draggedColumn, setDraggedColumn] = useState<string | null>(null);
+  const [draggedNote, setDraggedNote] = useState<string | null>(null);
 
   const addNewColumn = () => {
     const newColumn = {
@@ -48,7 +47,10 @@ export default function NotesBoard({
 
   const deleteColumn = (columnId: string) => {
     const newColumns = columns.filter((column) => column.columnId !== columnId);
+    const newNotes = notes.filter((note) => note.columnId !== columnId);
+
     setColumns(newColumns);
+    setNotes(newNotes);
   };
 
   const updateColumnTitle = (columnId: string, newTitle: string) => {
@@ -61,17 +63,85 @@ export default function NotesBoard({
   };
 
   const addNewNoteIntoColumn = (columnId: string) => {
-    setNotes([...notes, { columnId, noteId: generateId() }]);
+    setNotes([
+      ...notes,
+      { columnId, noteId: generateId(), noteText: 'New Note' },
+    ]);
+  };
+
+  const updateNoteText = (noteId: string, newText: string) => {
+    const newNotes = notes.map((note: any) => {
+      if (note.noteId !== noteId) return note;
+      return { ...note, noteText: newText };
+    });
+
+    setNotes(newNotes);
+  };
+
+  const deleteNoteFromColumn = (noteId: string) => {
+    const newNotes = notes.filter((note: any) => note.noteId !== noteId);
+    setNotes(newNotes);
   };
 
   const handleDragStart = (event: DragStartEvent) => {
-    console.log(event);
     if (event.active.data?.current?.type === 'column') {
       setDraggedColumn(event.active.data.current.column);
+      return;
+    }
+
+    if (event.active.data?.current?.type === 'note') {
+      setDraggedNote(event.active.data?.current?.note);
+    }
+  };
+
+  const handleDragOver = (event: DragOverEvent) => {
+    const { active, over } = event;
+
+    if (!over) return;
+
+    const activeId = active.id;
+    const overId = over.id;
+
+    if (activeId === overId) return;
+
+    const isActiveNote = active.data?.current?.type === 'note';
+    const isOverNote = over.data?.current?.type === 'note';
+
+    if (!isActiveNote) return;
+
+    // dropped note on note
+    if (isOverNote) {
+      const activeIndex = notes.findIndex((note) => note.noteId === activeId);
+      const overIndex = notes.findIndex((note) => note.noteId === overId);
+
+      if (activeIndex === -1 || overIndex === -1) return;
+
+      const newNotes = notes
+        .with(activeIndex, notes[overIndex])
+        .with(overIndex, notes[activeIndex]);
+
+      setNotes(newNotes);
+      return;
+    }
+
+    // dropped note on column
+    const isOverColumn = over.data?.current?.type === 'column';
+
+    if (isOverColumn) {
+      const newNotes = notes.map((note) => {
+        if (note.noteId === activeId) return { ...note, columnId: overId };
+
+        return note;
+      });
+
+      setNotes(newNotes);
     }
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
+    setDraggedNote(null);
+    setDraggedColumn(null);
+
     const { active, over } = event;
 
     if (!over || active.id === over.id) return;
@@ -99,6 +169,7 @@ export default function NotesBoard({
       <Button onClick={addNewColumn}>Add new column</Button>
       <DndContext
         onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
         sensors={sensors}
       >
@@ -111,9 +182,12 @@ export default function NotesBoard({
               deleteColumn={deleteColumn}
               updateColumnTitle={updateColumnTitle}
               addNewNoteIntoColumn={addNewNoteIntoColumn}
+              updateNoteText={updateNoteText}
+              deleteNoteFromColumn={deleteNoteFromColumn}
             />
           ))}
         </SortableContext>
+
         {createPortal(
           <DragOverlay>
             {draggedColumn && (
@@ -121,6 +195,17 @@ export default function NotesBoard({
                 column={draggedColumn}
                 notes={notes}
                 deleteColumn={deleteColumn}
+                updateColumnTitle={updateColumnTitle}
+                addNewNoteIntoColumn={addNewNoteIntoColumn}
+                updateNoteText={updateNoteText}
+                deleteNoteFromColumn={deleteNoteFromColumn}
+              />
+            )}
+            {draggedNote && (
+              <Note
+                note={draggedNote}
+                updateNoteText={updateNoteText}
+                deleteNoteFromColumn={deleteNoteFromColumn}
               />
             )}
           </DragOverlay>,

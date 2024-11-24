@@ -1,8 +1,9 @@
 import { FaRegTrashAlt } from 'react-icons/fa';
 import { Button } from './ui/button';
-import { useSortable } from '@dnd-kit/sortable';
+import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import Note from './note';
 
 export default function NotesColumn({
   column,
@@ -10,10 +11,15 @@ export default function NotesColumn({
   deleteColumn,
   updateColumnTitle,
   addNewNoteIntoColumn,
+  deleteNoteFromColumn,
+  updateNoteText,
 }: any) {
   const [columnTitle, setColumnTitle] = useState('');
   const [isTitleUpdated, setIsTitleUpdate] = useState(false);
-  const [noteText, setNoteText] = useState('');
+  const notesIds = useMemo(
+    () => notes.map((note: any) => note.noteId),
+    [notes],
+  );
 
   const {
     setNodeRef,
@@ -56,6 +62,7 @@ export default function NotesColumn({
             {isTitleUpdated ? (
               <input
                 type='text'
+                minLength={1}
                 value={columnTitle}
                 onChange={(e) => setColumnTitle(e.target.value)}
                 onBlur={() => {
@@ -63,7 +70,7 @@ export default function NotesColumn({
                   setIsTitleUpdate(false);
                 }}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
+                  if (e.key === 'Enter' && columnTitle) {
                     setIsTitleUpdate(false);
                     updateColumnTitle(column.columnId, columnTitle);
                   }
@@ -85,10 +92,21 @@ export default function NotesColumn({
           </Button>
         </div>
       </div>
-      <div className='flex flex-grow'></div>
-      {notes.map(({ noteId }: any) => {
-        return <div key={noteId}>note</div>;
-      })}
+      <div className='flex flex-grow gap-4 p-2 overflow-x-hidden overflow-y-auto'></div>
+      <SortableContext items={notesIds}>
+        {notes.map((note: any) => {
+          return (
+            <Note
+              key={note.noteId}
+              note={note}
+              deleteNoteFromColumn={deleteNoteFromColumn}
+              updateNoteText={updateNoteText}
+            >
+              note
+            </Note>
+          );
+        })}
+      </SortableContext>
       <Button onClick={() => addNewNoteIntoColumn(column.columnId)}>
         Add Note
       </Button>
