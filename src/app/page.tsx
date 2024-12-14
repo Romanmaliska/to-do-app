@@ -1,9 +1,8 @@
-import { testDatabaseConnection } from '@/app/actions/notesActions';
-import { getNotes } from '@/app/actions/notesActions';
-
-import type { UserNoteDocument } from '@/app/types/note';
+import { testDatabaseConnection, getNotes } from '@/app/actions/notesActions';
 
 import NotesBoard from '@/app/components/notesBoard';
+
+import type { UserColumnDocument, UserColumn } from '@/app/types/note';
 
 export default async function Home() {
   const isMongoDBAlive = await testDatabaseConnection();
@@ -11,15 +10,19 @@ export default async function Home() {
     return <div>Database is not connected</div>;
   }
 
-  const notes: UserNoteDocument[] = await getNotes();
-
-  const notesWithStringId = notes.map((note) => {
-    return { ...note, _id: note._id.toString() };
-  });
+  const columnDocument: UserColumnDocument[] = await getNotes();
+  const columns: UserColumn[] = columnDocument
+    .map(({ _id, ...data }) => {
+      return {
+        ...data,
+        columnId: _id.toString(),
+      };
+    })
+    .toSorted((a, b) => a.columnIndex - b.columnIndex);
 
   return (
-    <main className='flex m-auto min-h-screen w-full items-center overflow-x-auto overflow-y-hidden px-10'>
-      <NotesBoard notesWithStringId={notesWithStringId} />
+    <main className='w-full overflow-x-auto overflow-y-hidden px-8'>
+      <NotesBoard columns={columns} />
     </main>
   );
 }
