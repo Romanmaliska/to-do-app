@@ -6,20 +6,23 @@ import { useMemo, useState } from 'react';
 import Note from './note';
 import { UserColumn, UserNote } from '@/app/types/note';
 
+import { handleDeleteColumn } from '../lib/hooks';
+
 type Props = {
+  columns: UserColumn[];
   column: UserColumn;
   notes: UserNote[];
-  handleDeleteColumn: (columnId: string) => void;
   updateColumnTitle: () => void;
   handleAddNote: (columnId: string) => void;
-  handleDeleteNote: (columnId: string, noteId: string) => void;
+  setOptimisticColumns: (columns: UserColumn[]) => void;
   updateNoteText: any;
 };
 
 export default function NotesColumn({
+  columns,
   column,
   notes,
-  handleDeleteColumn,
+  setOptimisticColumns,
   updateColumnTitle,
   handleAddNote,
   handleDeleteNote,
@@ -93,7 +96,14 @@ export default function NotesColumn({
               </h3>
             )}
           </div>
-          <form action={handleDeleteColumn.bind(null, column.columnId)}>
+          <form
+            action={handleDeleteColumn.bind(
+              null,
+              setOptimisticColumns,
+              column.columnId,
+              columns,
+            )}
+          >
             <Button variant='outline' size='sm'>
               <FaRegTrashAlt />
             </Button>

@@ -28,6 +28,7 @@ import {
 import NotesColumn from '@/app/components/notesColumn';
 import Note from '@/app/components/note';
 import { Button } from './ui/button';
+import { handleAddColumn } from '@/app/lib/hooks';
 
 import type { UserColumn, UserNote } from '@/app/types/note';
 import NotesColumnSkeleton from './notesColumnSkeleton';
@@ -44,33 +45,6 @@ export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
 
   const [draggedColumn, setDraggedColumn] = useState<string | null>(null);
   const [draggedNote, setDraggedNote] = useState<string | null>(null);
-
-  const handleAddColumn = async () => {
-    const newColumn = {
-      columnTitle: 'New Column ' + columns.length,
-      columnIndex: Date.now(),
-      columnId: generateId(),
-      notes: [],
-    };
-
-    try {
-      setOptimisticColumns([...columns, newColumn]);
-      await addNewColumn(newColumn);
-    } catch (error) {
-      setOptimisticColumns(columns);
-    }
-  };
-
-  const handleDeleteColumn = async (columnId: string) => {
-    const newColumns = columns.filter((column) => column.columnId !== columnId);
-    try {
-      setOptimisticColumns(newColumns);
-      deleteColumn(columnId);
-    } catch (error) {
-      console.error(error);
-      setOptimisticColumns(columns);
-    }
-  };
 
   const handleAddNote = async (columnId: string) => {
     const newNote = {
@@ -172,9 +146,6 @@ export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
     const isOverColumn = over.data?.current?.type === 'column';
 
     if (!isActiveNote) return;
-
-    console.log('activeId', active.data);
-    console.log('over', over.data);
 
     // dropped note on note
     if (isOverNote) {
@@ -295,7 +266,6 @@ export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
 
     // dropped note on column
     if (isOverColumn) {
-      console.log('dropped note on column');
       const activeColumnIndex = columns.findIndex((col) =>
         col.notes.find((note) => note.noteId === activeId),
       );
@@ -329,8 +299,6 @@ export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
 
         return col;
       });
-
-      console.log('newColumns', newColumns);
 
       startTransition(async () => {
         setOptimisticColumns(
@@ -367,10 +335,11 @@ export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
         <SortableContext items={columnsIds}>
           {optimisticColumns.map((column) => (
             <NotesColumn
+              columns={columns}
               key={column.columnId}
               column={column}
               notes={column.notes}
-              handleDeleteColumn={handleDeleteColumn}
+              setOptimisticColumns={setOptimisticColumns}
               updateColumnTitle={updateColumnTitle}
               handleAddNote={handleAddNote}
               handleDeleteNote={handledeleteNote}
@@ -394,7 +363,7 @@ export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
         )}
       </DndContext>
 
-      <form action={handleAddColumn}>
+      <form action={handleAddColumn.bind(null, setOptimisticColumns, columns)}>
         <Button className='' variant='outline'>
           Add new column
         </Button>
