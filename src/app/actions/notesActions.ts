@@ -27,12 +27,24 @@ export async function testDatabaseConnection() {
   }
 }
 
-export async function getNotes() {
-  return await mongoDBclient
+export async function getSortedColumns() {
+  const columnDocument: UserColumnDocument[] = await mongoDBclient
     .db('notes')
     .collection<UserColumnDocument>('notes')
     .find()
     .toArray();
+
+  const sortedColumns: UserColumn[] = columnDocument
+    .map(({ _id, notes, ...data }) => {
+      return {
+        ...data,
+        notes: notes.toSorted((a, b) => a.noteIndex - b.noteIndex),
+        columnId: _id.toString(),
+      };
+    })
+    .toSorted((a, b) => a.columnIndex - b.columnIndex);
+
+  return sortedColumns;
 }
 
 export async function addNewColumn(newColumn: UserColumn) {
