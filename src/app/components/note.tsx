@@ -12,20 +12,23 @@ import {
   CardHeader,
 } from '@/app/components/ui/card';
 import { Button } from '@/app/components/ui/button';
-import UpdateNoteDialog from '@/app/components/updateNoteDialog';
 
-import type { UserNote } from '@/app/types/note';
+import { handleDeleteNote } from '@/app/lib/hooks';
+
+import type { UserColumn, UserNote } from '@/app/types/note';
 
 export default function Note({
   note,
+  columns,
   columnId,
-  handleDeleteNote,
   updateNoteText,
+  setOptimisticColumns,
 }: {
   note: UserNote;
+  columns: UserColumn[];
   columnId: string;
-  handleDeleteNote: (columnId: string, noteId: string) => void;
   updateNoteText: any;
+  setOptimisticColumns: (columns: UserColumn[]) => void;
 }) {
   const [noteText, setNoteText] = useState('');
   const [isNoteUpdated, setIsNoteUpdated] = useState(false);
@@ -92,11 +95,19 @@ export default function Note({
           )} */}
         </div>
 
-        {/* <form action={handleDeleteNote.bind(null, columnId, note.noteId)}>
+        <form
+          action={handleDeleteNote.bind(
+            null,
+            setOptimisticColumns,
+            columnId,
+            columns,
+            note.noteId,
+          )}
+        >
           <Button variant='destructive' size='sm'>
             Delete
           </Button>
-        </form> */}
+        </form>
       </div>
     </div>
   );

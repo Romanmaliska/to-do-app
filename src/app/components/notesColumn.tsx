@@ -6,14 +6,13 @@ import { useMemo, useState } from 'react';
 import Note from './note';
 import { UserColumn, UserNote } from '@/app/types/note';
 
-import { handleDeleteColumn } from '../lib/hooks';
+import { handleAddNote, handleDeleteColumn } from '../lib/hooks';
 
 type Props = {
   columns: UserColumn[];
   column: UserColumn;
   notes: UserNote[];
   updateColumnTitle: () => void;
-  handleAddNote: (columnId: string) => void;
   setOptimisticColumns: (columns: UserColumn[]) => void;
   updateNoteText: any;
 };
@@ -22,10 +21,8 @@ export default function NotesColumn({
   columns,
   column,
   notes,
-  setOptimisticColumns,
   updateColumnTitle,
-  handleAddNote,
-  handleDeleteNote,
+  setOptimisticColumns,
   updateNoteText,
 }: Props) {
   const [columnTitle, setColumnTitle] = useState('');
@@ -116,16 +113,24 @@ export default function NotesColumn({
           return (
             <Note
               key={note.noteId}
+              setOptimisticColumns={setOptimisticColumns}
+              columns={columns}
               note={note}
               columnId={column.columnId}
-              handleDeleteNote={handleDeleteNote}
               updateNoteText={updateNoteText}
             />
           );
         })}
       </SortableContext>
 
-      <form action={handleAddNote.bind(null, column.columnId)}>
+      <form
+        action={handleAddNote.bind(
+          null,
+          setOptimisticColumns,
+          column.columnId,
+          columns,
+        )}
+      >
         <Button variant='outline'>Add Note</Button>
       </form>
     </div>

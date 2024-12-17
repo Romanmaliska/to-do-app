@@ -12,14 +12,8 @@ import {
 } from '@dnd-kit/core';
 import { DndContext, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext } from '@dnd-kit/sortable';
-
-import { generateId } from '@/app/lib/utils';
 import {
-  addNewColumn,
-  deleteColumn,
   updateColumnsPosition,
-  addNewNote,
-  deleteNote,
   updateNotePositionInsideColumn,
   updateNotePositionOutsideColumn,
   moveNoteToNewColumn,
@@ -45,38 +39,6 @@ export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
 
   const [draggedColumn, setDraggedColumn] = useState<string | null>(null);
   const [draggedNote, setDraggedNote] = useState<string | null>(null);
-
-  const handleAddNote = async (columnId: string) => {
-    const newNote = {
-      noteText: generateId().toString(),
-      noteId: generateId(),
-      noteIndex:
-        columns.find((col) => col.columnId === columnId)?.notes.length || 0,
-    };
-
-    const newColumns = columns.map((col) => {
-      if (col.columnId !== columnId) return col;
-
-      return { ...col, notes: [...col.notes, newNote] };
-    });
-
-    setOptimisticColumns(newColumns);
-
-    await addNewNote(columnId, newNote);
-  };
-
-  const handledeleteNote = async (columnId: string, noteId: string) => {
-    const newColumns = columns.map((col) => {
-      if (col.columnId !== columnId) return col;
-
-      const newNotes = col.notes.filter((note) => note.noteId !== noteId);
-
-      return { ...col, notes: newNotes };
-    });
-
-    setOptimisticColumns(newColumns);
-    deleteNote(columnId, noteId);
-  };
 
   const updateColumnTitle = (columnId: string, newTitle: string) => {
     // const newColumns = columnsState.map((col) => {
@@ -341,8 +303,6 @@ export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
               notes={column.notes}
               setOptimisticColumns={setOptimisticColumns}
               updateColumnTitle={updateColumnTitle}
-              handleAddNote={handleAddNote}
-              handleDeleteNote={handledeleteNote}
               updateNoteText={updateNoteText}
             />
           ))}
@@ -352,11 +312,7 @@ export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
           <DragOverlay>
             {draggedColumn && <NotesColumnSkeleton />}
             {draggedNote && (
-              <Note
-                note={draggedNote}
-                updateNoteText={updateNoteText}
-                deleteNoteFromColumn={handledeleteNote}
-              />
+              <Note note={draggedNote} updateNoteText={updateNoteText} />
             )}
           </DragOverlay>,
           document?.body,
