@@ -12,9 +12,10 @@ export default async function Home() {
 
   const columnDocument: UserColumnDocument[] = await getNotes();
   const columns: UserColumn[] = columnDocument
-    .map(({ _id, ...data }) => {
+    .map(({ _id, notes, ...data }) => {
       return {
         ...data,
+        notes: notes.toSorted((a, b) => a.noteIndex - b.noteIndex),
         columnId: _id.toString(),
       };
     })

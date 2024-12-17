@@ -1,5 +1,6 @@
 'use client';
-import { useMemo, useState } from 'react';
+
+import { useMemo, useState, useOptimistic, useTransition, act } from 'react';
 import { createPortal } from 'react-dom';
 
 import {
@@ -13,22 +14,29 @@ import { DndContext, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext } from '@dnd-kit/sortable';
 
 import { generateId } from '@/app/lib/utils';
-import NotesColumn from './notesColumn';
+import {
+  addNewColumn,
+  deleteColumn,
+  updateColumnsPosition,
+  addNewNote,
+  deleteNote,
+  updateNotePositionInsideColumn,
+  updateNotePositionOutsideColumn,
+  moveNoteToNewColumn,
+} from '@/app/actions/notesActions';
+
+import NotesColumn from '@/app/components/notesColumn';
+import Note from '@/app/components/note';
 import { Button } from './ui/button';
 
-import type { UserNoteWithStringifiedId } from '@/app/types/note';
-import Note from './note';
+import type { UserColumn, UserNote } from '@/app/types/note';
+import NotesColumnSkeleton from './notesColumnSkeleton';
 
-export default function NotesBoard({
-  notesWithStringId,
-}: {
-  notesWithStringId: UserNoteWithStringifiedId[];
-}) {
-  const [notes, setNotes] = useState<any>([]);
+export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
+  const [optimisticColumns, setOptimisticColumns] = useOptimistic(columns);
 
-  const [columns, setColumns] = useState<
-    { columnTitle: string; columnId: string }[]
-  >([]);
+  const [_, startTransition] = useTransition();
+
   const columnsIds = useMemo(
     () => columns.map((col) => col.columnId),
     [columns],
@@ -37,50 +45,79 @@ export default function NotesBoard({
   const [draggedColumn, setDraggedColumn] = useState<string | null>(null);
   const [draggedNote, setDraggedNote] = useState<string | null>(null);
 
-  const addNewColumn = () => {
+  const handleAddColumn = async () => {
     const newColumn = {
-      columnTitle: `New column ${columns.length + 1}`,
+      columnTitle: 'New Column ' + columns.length,
+      columnIndex: Date.now(),
       columnId: generateId(),
+      notes: [],
     };
-    setColumns([...columns, newColumn]);
+
+    try {
+      setOptimisticColumns([...columns, newColumn]);
+      await addNewColumn(newColumn);
+    } catch (error) {
+      setOptimisticColumns(columns);
+    }
   };
 
-  const deleteColumn = (columnId: string) => {
+  const handleDeleteColumn = async (columnId: string) => {
     const newColumns = columns.filter((column) => column.columnId !== columnId);
-    const newNotes = notes.filter((note) => note.columnId !== columnId);
+    try {
+      setOptimisticColumns(newColumns);
+      deleteColumn(columnId);
+    } catch (error) {
+      console.error(error);
+      setOptimisticColumns(columns);
+    }
+  };
 
-    setColumns(newColumns);
-    setNotes(newNotes);
+  const handleAddNote = async (columnId: string) => {
+    const newNote = {
+      noteText: generateId().toString(),
+      noteId: generateId(),
+      noteIndex:
+        columns.find((col) => col.columnId === columnId)?.notes.length || 0,
+    };
+
+    const newColumns = columns.map((col) => {
+      if (col.columnId !== columnId) return col;
+
+      return { ...col, notes: [...col.notes, newNote] };
+    });
+
+    setOptimisticColumns(newColumns);
+
+    await addNewNote(columnId, newNote);
+  };
+
+  const handledeleteNote = async (columnId: string, noteId: string) => {
+    const newColumns = columns.map((col) => {
+      if (col.columnId !== columnId) return col;
+
+      const newNotes = col.notes.filter((note) => note.noteId !== noteId);
+
+      return { ...col, notes: newNotes };
+    });
+
+    setOptimisticColumns(newColumns);
+    deleteNote(columnId, noteId);
   };
 
   const updateColumnTitle = (columnId: string, newTitle: string) => {
-    const newColumns = columns.map((col) => {
-      if (col.columnId !== columnId) return col;
-      return { ...col, columnTitle: newTitle };
-    });
-
-    setColumns(newColumns);
-  };
-
-  const addNewNoteIntoColumn = (columnId: string) => {
-    setNotes([
-      ...notes,
-      { columnId, noteId: generateId(), noteText: 'New Note' },
-    ]);
+    // const newColumns = columnsState.map((col) => {
+    //   if (col.columnId !== columnId) return col;
+    //   return { ...col, columnTitle: newTitle };
+    // });
+    // setColumns(newColumns);
   };
 
   const updateNoteText = (noteId: string, newText: string) => {
-    const newNotes = notes.map((note: any) => {
-      if (note.noteId !== noteId) return note;
-      return { ...note, noteText: newText };
-    });
-
-    setNotes(newNotes);
-  };
-
-  const deleteNoteFromColumn = (noteId: string) => {
-    const newNotes = notes.filter((note: any) => note.noteId !== noteId);
-    setNotes(newNotes);
+    // const newNotes = notesState.map((note: any) => {
+    //   if (note.noteId !== noteId) return note;
+    //   return { ...note, noteText: newText };
+    // });
+    // setNotes(newNotes);
   };
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -94,51 +131,7 @@ export default function NotesBoard({
     }
   };
 
-  const handleDragOver = (event: DragOverEvent) => {
-    const { active, over } = event;
-
-    if (!over) return;
-
-    const activeId = active.id;
-    const overId = over.id;
-
-    if (activeId === overId) return;
-
-    const isActiveNote = active.data?.current?.type === 'note';
-    const isOverNote = over.data?.current?.type === 'note';
-
-    if (!isActiveNote) return;
-
-    // dropped note on note
-    if (isOverNote) {
-      const activeIndex = notes.findIndex((note) => note.noteId === activeId);
-      const overIndex = notes.findIndex((note) => note.noteId === overId);
-
-      if (activeIndex === -1 || overIndex === -1) return;
-
-      const newNotes = notes
-        .with(activeIndex, notes[overIndex])
-        .with(overIndex, notes[activeIndex]);
-
-      setNotes(newNotes);
-      return;
-    }
-
-    // dropped note on column
-    const isOverColumn = over.data?.current?.type === 'column';
-
-    if (isOverColumn) {
-      const newNotes = notes.map((note) => {
-        if (note.noteId === activeId) return { ...note, columnId: overId };
-
-        return note;
-      });
-
-      setNotes(newNotes);
-    }
-  };
-
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleColumnDragEnd = (event: DragEndEvent) => {
     setDraggedNote(null);
     setDraggedColumn(null);
 
@@ -155,7 +148,206 @@ export default function NotesBoard({
       .with(activeIndex, columns[overIndex])
       .with(overIndex, columns[activeIndex]);
 
-    setColumns(newColumns);
+    startTransition(async () => {
+      setOptimisticColumns(newColumns);
+      await updateColumnsPosition({
+        overIndex: columns[overIndex].columnIndex,
+        activeIndex: columns[activeIndex].columnIndex,
+        overId: over.id,
+        activeId: active.id,
+      });
+    });
+  };
+
+  const handleNoteDragOver = (event: DragOverEvent) => {
+    const { active, over } = event;
+    if (!over) return;
+
+    const activeId = active.id as string;
+    const overId = over.id as string;
+    if (activeId === overId) return;
+
+    const isActiveNote = active.data?.current?.type === 'note';
+    const isOverNote = over.data?.current?.type === 'note';
+    const isOverColumn = over.data?.current?.type === 'column';
+
+    if (!isActiveNote) return;
+
+    console.log('activeId', active.data);
+    console.log('over', over.data);
+
+    // dropped note on note
+    if (isOverNote) {
+      const activeColumnIndex = columns.findIndex((col) =>
+        col.notes.find((note) => note.noteId === activeId),
+      );
+
+      const overColumnIndex = columns.findIndex((col) =>
+        col.notes.find((note) => note.noteId === overId),
+      );
+
+      if (activeColumnIndex < 0 && overColumnIndex < 0) return;
+
+      const activeNoteIndex = columns[activeColumnIndex].notes.findIndex(
+        (note) => note.noteId === activeId,
+      );
+
+      const overNoteIndex = columns[overColumnIndex].notes.findIndex(
+        (note) => note.noteId === overId,
+      );
+
+      const activeNote = columns[activeColumnIndex].notes.find(
+        (note) => note.noteId === activeId,
+      );
+
+      if (!activeNote) return;
+
+      // dropped note on note in the same column
+      if (activeColumnIndex === overColumnIndex) {
+        const newColumns = columns.map((col) => ({
+          ...col,
+          notes: col.notes.map((note) => ({ ...note })),
+        }));
+        const activeNote = newColumns[activeColumnIndex].notes[activeNoteIndex];
+        const overNote = newColumns[overColumnIndex].notes[overNoteIndex];
+
+        if (!activeNote || !overNote) return;
+
+        [activeNote.noteIndex, overNote.noteIndex] = [
+          overNote.noteIndex,
+          activeNote.noteIndex,
+        ];
+
+        startTransition(async () => {
+          setOptimisticColumns(
+            newColumns.map((col) => ({
+              ...col,
+              notes: col.notes.toSorted((a, b) => a.noteIndex - b.noteIndex),
+            })),
+          );
+
+          await updateNotePositionInsideColumn({
+            activeColumnId: columns[activeColumnIndex].columnId,
+            activeNoteIndex,
+            overNoteIndex,
+            activeNoteId: activeId,
+            overNoteId: overId,
+          });
+        });
+
+        return;
+      }
+
+      // dropped note on note in different columns
+      if (activeColumnIndex !== overColumnIndex) {
+        // add note to new column and increase noteIndexes
+        const newColumns = columns.map((col, index) => {
+          if (activeColumnIndex === index) {
+            return {
+              ...col,
+              notes: col.notes.reduce<UserNote[]>((acc, curr, i) => {
+                if (i < activeNoteIndex) return [...acc, curr];
+                if (i === activeNoteIndex) return acc;
+                return [...acc, { ...curr, noteIndex: i - 1 }];
+              }, []),
+            };
+          }
+
+          if (overColumnIndex === index) {
+            return {
+              ...col,
+              notes: col.notes.reduce<UserNote[]>((acc, curr, i) => {
+                if (i < overNoteIndex) return [...acc, curr];
+                if (i === overNoteIndex)
+                  return [
+                    ...acc,
+                    { ...curr, noteIndex: i },
+                    { ...activeNote, noteIndex: i + 1 },
+                  ];
+                return [...acc, { ...curr, noteIndex: i + 2 }];
+              }, []),
+            };
+          }
+
+          return col;
+        });
+
+        startTransition(async () => {
+          setOptimisticColumns(
+            newColumns.map((col) => ({
+              ...col,
+              notes: col.notes.toSorted((a, b) => a.noteIndex - b.noteIndex),
+            })),
+          );
+
+          await updateNotePositionOutsideColumn({
+            activeColumnId: columns[activeColumnIndex].columnId,
+            overColumnId: columns[overColumnIndex].columnId,
+            activeNoteIndex,
+            overNoteIndex,
+            activeNoteId: activeId,
+          });
+        });
+
+        return;
+      }
+    }
+
+    // dropped note on column
+    if (isOverColumn) {
+      console.log('dropped note on column');
+      const activeColumnIndex = columns.findIndex((col) =>
+        col.notes.find((note) => note.noteId === activeId),
+      );
+      const activeNoteIndex = columns[activeColumnIndex].notes.findIndex(
+        (note) => note.noteId === activeId,
+      );
+
+      const activeNote = columns[activeColumnIndex].notes.find(
+        (note) => note.noteId === activeId,
+      );
+
+      if (!activeNote) return;
+
+      const newColumns = columns.map((col, index) => {
+        if (overId === col.columnId) {
+          return {
+            ...col,
+            notes: [{ ...activeNote, noteIndex: 0 }],
+          };
+        }
+        if (activeColumnIndex === index) {
+          return {
+            ...col,
+            notes: col.notes.reduce<UserNote[]>((acc, curr, i) => {
+              if (i < activeNoteIndex) return [...acc, curr];
+              if (i === activeNoteIndex) return acc;
+              return [...acc, { ...curr, noteIndex: i - 1 }];
+            }, []),
+          };
+        }
+
+        return col;
+      });
+
+      console.log('newColumns', newColumns);
+
+      startTransition(async () => {
+        setOptimisticColumns(
+          newColumns.map((col) => ({
+            ...col,
+            notes: col.notes.toSorted((a, b) => a.noteIndex - b.noteIndex),
+          })),
+        );
+
+        await moveNoteToNewColumn({
+          activeColumnId: columns[activeColumnIndex].columnId,
+          activeNoteIndex,
+          activeNoteId: activeId,
+          overColumnId: overId,
+        });
+      });
+    }
   };
 
   const sensors = useSensors(
@@ -166,52 +358,47 @@ export default function NotesBoard({
 
   return (
     <div className='flex m-auto gap-4'>
-      <Button onClick={addNewColumn}>Add new column</Button>
       <DndContext
         onDragStart={handleDragStart}
-        onDragOver={handleDragOver}
-        onDragEnd={handleDragEnd}
+        onDragOver={handleNoteDragOver}
+        onDragEnd={handleColumnDragEnd}
         sensors={sensors}
       >
         <SortableContext items={columnsIds}>
-          {columns.map((col) => (
+          {optimisticColumns.map((column) => (
             <NotesColumn
-              key={col.columnId}
-              column={col}
-              notes={notes.filter((note) => note.columnId === col.columnId)}
-              deleteColumn={deleteColumn}
+              key={column.columnId}
+              column={column}
+              notes={column.notes}
+              handleDeleteColumn={handleDeleteColumn}
               updateColumnTitle={updateColumnTitle}
-              addNewNoteIntoColumn={addNewNoteIntoColumn}
+              handleAddNote={handleAddNote}
+              handleDeleteNote={handledeleteNote}
               updateNoteText={updateNoteText}
-              deleteNoteFromColumn={deleteNoteFromColumn}
             />
           ))}
         </SortableContext>
 
         {createPortal(
           <DragOverlay>
-            {draggedColumn && (
-              <NotesColumn
-                column={draggedColumn}
-                notes={notes}
-                deleteColumn={deleteColumn}
-                updateColumnTitle={updateColumnTitle}
-                addNewNoteIntoColumn={addNewNoteIntoColumn}
-                updateNoteText={updateNoteText}
-                deleteNoteFromColumn={deleteNoteFromColumn}
-              />
-            )}
+            {draggedColumn && <NotesColumnSkeleton />}
             {draggedNote && (
               <Note
                 note={draggedNote}
                 updateNoteText={updateNoteText}
-                deleteNoteFromColumn={deleteNoteFromColumn}
+                deleteNoteFromColumn={handledeleteNote}
               />
             )}
           </DragOverlay>,
-          document.body,
+          document?.body,
         )}
       </DndContext>
+
+      <form action={handleAddColumn}>
+        <Button className='' variant='outline'>
+          Add new column
+        </Button>
+      </form>
     </div>
   );
 }

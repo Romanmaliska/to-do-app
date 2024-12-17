@@ -4,16 +4,27 @@ import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useMemo, useState } from 'react';
 import Note from './note';
+import { UserColumn, UserNote } from '@/app/types/note';
+
+type Props = {
+  column: UserColumn;
+  notes: UserNote[];
+  handleDeleteColumn: (columnId: string) => void;
+  updateColumnTitle: () => void;
+  handleAddNote: (columnId: string) => void;
+  handleDeleteNote: (columnId: string, noteId: string) => void;
+  updateNoteText: any;
+};
 
 export default function NotesColumn({
   column,
   notes,
-  deleteColumn,
+  handleDeleteColumn,
   updateColumnTitle,
-  addNewNoteIntoColumn,
-  deleteNoteFromColumn,
+  handleAddNote,
+  handleDeleteNote,
   updateNoteText,
-}: any) {
+}: Props) {
   const [columnTitle, setColumnTitle] = useState('');
   const [isTitleUpdated, setIsTitleUpdate] = useState(false);
   const notesIds = useMemo(
@@ -42,7 +53,7 @@ export default function NotesColumn({
   if (isDragging) {
     return (
       <div
-        className='flex flex-col w-60 h-96 max-h-[500px] rounded-md bg-gold'
+        className='flex flex-col w-60 h-96 rounded-md bg-gold'
         ref={setNodeRef}
         style={style}
       ></div>
@@ -51,13 +62,12 @@ export default function NotesColumn({
 
   return (
     <div
-      className='flex flex-col w-60 h-96 max-h-[500px] rounded-md bg-silver'
+      className='flex flex-col w-52 min-h-80 rounded-md border border-gray-300'
       ref={setNodeRef}
       style={style}
     >
       <div className='h-14 cursor-grab rounded-md rounded-b-none p-3 border-spacing-4'>
         <div className='flex gap-4' {...attributes} {...listeners}>
-          <div>0</div>
           <div>
             {isTitleUpdated ? (
               <input
@@ -83,33 +93,31 @@ export default function NotesColumn({
               </h3>
             )}
           </div>
-          <Button
-            variant='outline'
-            size='sm'
-            onClick={() => deleteColumn(column.columnId)}
-          >
-            <FaRegTrashAlt />
-          </Button>
+          <form action={handleDeleteColumn.bind(null, column.columnId)}>
+            <Button variant='outline' size='sm'>
+              <FaRegTrashAlt />
+            </Button>
+          </form>
         </div>
       </div>
-      <div className='flex flex-grow gap-4 p-2 overflow-x-hidden overflow-y-auto'></div>
+
       <SortableContext items={notesIds}>
-        {notes.map((note: any) => {
+        {notes.map((note: UserNote) => {
           return (
             <Note
               key={note.noteId}
               note={note}
-              deleteNoteFromColumn={deleteNoteFromColumn}
+              columnId={column.columnId}
+              handleDeleteNote={handleDeleteNote}
               updateNoteText={updateNoteText}
-            >
-              note
-            </Note>
+            />
           );
         })}
       </SortableContext>
-      <Button onClick={() => addNewNoteIntoColumn(column.columnId)}>
-        Add Note
-      </Button>
+
+      <form action={handleAddNote.bind(null, column.columnId)}>
+        <Button variant='outline'>Add Note</Button>
+      </form>
     </div>
   );
 }

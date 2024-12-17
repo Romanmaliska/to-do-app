@@ -1,6 +1,9 @@
 'use client';
 
-import { deleteNote } from '@/app/actions/notesActions';
+import { useState } from 'react';
+
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 import {
   Card,
@@ -11,22 +14,20 @@ import {
 import { Button } from '@/app/components/ui/button';
 import UpdateNoteDialog from '@/app/components/updateNoteDialog';
 
-import type { UserNoteWithStringifiedId } from '@/app/types/note';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { useState } from 'react';
+import type { UserNote } from '@/app/types/note';
 
 export default function Note({
-  updateNoteText,
-  deleteNoteFromColumn,
   note,
+  columnId,
+  handleDeleteNote,
+  updateNoteText,
 }: {
+  note: UserNote;
+  columnId: string;
+  handleDeleteNote: (columnId: string, noteId: string) => void;
   updateNoteText: any;
-  deleteNoteFromColumn: any;
-  note: any;
 }) {
   const [noteText, setNoteText] = useState('');
-  const [isHoveringOverNote, setIsHoveringOverNote] = useState(false);
   const [isNoteUpdated, setIsNoteUpdated] = useState(false);
 
   const {
@@ -49,7 +50,6 @@ export default function Note({
 
   const toggleUpdateNote = () => {
     setIsNoteUpdated((prev) => !prev);
-    setIsHoveringOverNote(false);
   };
 
   if (isDragging) {
@@ -67,12 +67,11 @@ export default function Note({
       style={style}
       {...listeners}
       {...attributes}
-      onMouseEnter={() => setIsHoveringOverNote(true)}
-      onMouseLeave={() => setIsHoveringOverNote(false)}
     >
       <div className='flex flex-col gap-8'>
         <div className='flex gap-4 place-content-end'>
-          {isNoteUpdated ? (
+          <h1>{note.noteId}</h1>
+          {/* {isNoteUpdated ? (
             <textarea
               value={noteText}
               onChange={(e) => setNoteText(e.target.value)}
@@ -89,26 +88,16 @@ export default function Note({
               autoFocus
             />
           ) : (
-            <div onClick={() => toggleUpdateNote()}>{note.noteText}</div>
-          )}
-          {/* {isHoveringOverNote && (
-            // <button onClick={() => deleteNoteFromColumn(note.noteId)}>
-            //   Delete
-            // </button>
+            <p onClick={() => toggleUpdateNote()}>{note.noteText}</p>
           )} */}
         </div>
+
+        {/* <form action={handleDeleteNote.bind(null, columnId, note.noteId)}>
+          <Button variant='destructive' size='sm'>
+            Delete
+          </Button>
+        </form> */}
       </div>
     </div>
   );
-}
-
-function DeleteNoteButton({ id }: { id: UserNoteWithStringifiedId['_id'] }) {
-  // const deleteNoteWithId = deleteNote.bind(null, id);
-  // return (
-  //   <form action={deleteNoteWithId}>
-  //     <Button variant='destructive' size='sm'>
-  //       Delete
-  //     </Button>
-  //   </form>
-  // );
 }
