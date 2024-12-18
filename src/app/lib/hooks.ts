@@ -10,9 +10,10 @@ import { generateId } from './utils';
 export async function handleAddColumn(
   setOptimisticColumns: (columns: UserColumn[]) => void,
   columns: UserColumn[],
+  columnTitle: string,
 ) {
   const newColumn = {
-    columnTitle: 'New Column ' + columns.length,
+    columnTitle,
     columnIndex: Date.now(),
     columnId: generateId(),
     notes: [],

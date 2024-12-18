@@ -9,7 +9,7 @@ import {
 } from '@dnd-kit/core';
 import { DndContext, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext } from '@dnd-kit/sortable';
-import { act,useMemo, useOptimistic, useState, useTransition } from 'react';
+import { useMemo, useOptimistic, useState, useTransition } from 'react';
 import { createPortal } from 'react-dom';
 
 import {
@@ -20,11 +20,12 @@ import {
 } from '@/app/actions/notesActions';
 import Note from '@/app/components/note';
 import NotesColumn from '@/app/components/notesColumn';
+import NotesColumnSkeleton from '@/app/components/notesColumnSkeleton';
+import { Button } from '@/app/components/ui/button';
 import { handleAddColumn } from '@/app/lib/hooks';
 import type { UserColumn, UserNote } from '@/app/types/note';
 
-import NotesColumnSkeleton from './notesColumnSkeleton';
-import { Button } from './ui/button';
+import { Input } from './ui/input';
 
 export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
   const [optimisticColumns, setOptimisticColumns] = useOptimistic(columns);
@@ -36,7 +37,7 @@ export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
     [columns],
   );
 
-  const [isAddNewColumnClicked, setIsAddNewColumnClicked] = useState(false);
+  const [isAddColumnClicked, setIsAddColumnClicked] = useState(false);
 
   const [draggedColumn, setDraggedColumn] = useState<string | null>(null);
   const [draggedNote, setDraggedNote] = useState<string | null>(null);
@@ -281,6 +282,12 @@ export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
     }
   };
 
+  const handleAddColumnTitle = (formData: FormData) => {
+    const columnTitle = formData.get('columnTitle') as string;
+    handleAddColumn(setOptimisticColumns, columns, columnTitle);
+    setIsAddColumnClicked(false);
+  };
+
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 4 },
@@ -320,19 +327,16 @@ export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
         )}
       </DndContext>
 
-      {isAddNewColumnClicked ? (
+      {isAddColumnClicked ? (
         <div>
-          <textarea autoFocus></textarea>
-          <Button className='' variant='outline'>
-            Add new column
-          </Button>
+          <form action={handleAddColumnTitle}>
+            <Input autoFocus type='text' name='columnTitle'></Input>
+          </form>
         </div>
       ) : (
-        <form
-          action={handleAddColumn.bind(null, setOptimisticColumns, columns)}
-        >
-          <Button variant='outline'>Add new column</Button>
-        </form>
+        <Button variant='outline' onClick={() => setIsAddColumnClicked(true)}>
+          Add new column
+        </Button>
       )}
     </div>
   );
