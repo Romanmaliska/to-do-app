@@ -1,12 +1,13 @@
-import { FaRegTrashAlt } from 'react-icons/fa';
-import { Button } from './ui/button';
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useMemo, useState } from 'react';
-import Note from './note';
+import { FaRegTrashAlt } from 'react-icons/fa';
+
 import { UserColumn, UserNote } from '@/app/types/note';
 
 import { handleAddNote, handleDeleteColumn } from '../lib/hooks';
+import Note from './note';
+import { Button } from './ui/button';
 
 type Props = {
   columns: UserColumn[];
@@ -23,6 +24,7 @@ export default function NotesColumn({
   notes,
   updateColumnTitle,
   setOptimisticColumns,
+
   updateNoteText,
 }: Props) {
   const [columnTitle, setColumnTitle] = useState('');

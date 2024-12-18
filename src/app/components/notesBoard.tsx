@@ -1,8 +1,5 @@
 'use client';
 
-import { useMemo, useState, useOptimistic, useTransition, act } from 'react';
-import { createPortal } from 'react-dom';
-
 import {
   DragEndEvent,
   DragOverEvent,
@@ -12,20 +9,22 @@ import {
 } from '@dnd-kit/core';
 import { DndContext, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext } from '@dnd-kit/sortable';
+import { act,useMemo, useOptimistic, useState, useTransition } from 'react';
+import { createPortal } from 'react-dom';
+
 import {
+  moveNoteToNewColumn,
   updateColumnsPosition,
   updateNotePositionInsideColumn,
   updateNotePositionOutsideColumn,
-  moveNoteToNewColumn,
 } from '@/app/actions/notesActions';
-
-import NotesColumn from '@/app/components/notesColumn';
 import Note from '@/app/components/note';
-import { Button } from './ui/button';
+import NotesColumn from '@/app/components/notesColumn';
 import { handleAddColumn } from '@/app/lib/hooks';
-
 import type { UserColumn, UserNote } from '@/app/types/note';
+
 import NotesColumnSkeleton from './notesColumnSkeleton';
+import { Button } from './ui/button';
 
 export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
   const [optimisticColumns, setOptimisticColumns] = useOptimistic(columns);
@@ -36,6 +35,8 @@ export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
     () => columns.map((col) => col.columnId),
     [columns],
   );
+
+  const [isAddNewColumnClicked, setIsAddNewColumnClicked] = useState(false);
 
   const [draggedColumn, setDraggedColumn] = useState<string | null>(null);
   const [draggedNote, setDraggedNote] = useState<string | null>(null);
@@ -319,11 +320,20 @@ export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
         )}
       </DndContext>
 
-      <form action={handleAddColumn.bind(null, setOptimisticColumns, columns)}>
-        <Button className='' variant='outline'>
-          Add new column
-        </Button>
-      </form>
+      {isAddNewColumnClicked ? (
+        <div>
+          <textarea autoFocus></textarea>
+          <Button className='' variant='outline'>
+            Add new column
+          </Button>
+        </div>
+      ) : (
+        <form
+          action={handleAddColumn.bind(null, setOptimisticColumns, columns)}
+        >
+          <Button variant='outline'>Add new column</Button>
+        </form>
+      )}
     </div>
   );
 }

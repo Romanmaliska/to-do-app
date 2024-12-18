@@ -1,8 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { updateNote } from '@/app/actions/notesActions';
 
+import { updateNote } from '@/app/actions/notesActions';
 import { Button } from '@/app/components/ui/button';
 import {
   Dialog,
@@ -21,7 +21,6 @@ import {
 } from '@/app/components/ui/form';
 import { Input } from '@/app/components/ui/input';
 import { Textarea } from '@/app/components/ui/textarea';
-
 import type { UserNoteWithStringifiedId } from '@/app/types/note';
 
 const formSchema = z.object({

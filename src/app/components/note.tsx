@@ -1,20 +1,17 @@
 'use client';
 
-import { useState } from 'react';
-
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useState } from 'react';
 
+import { Button } from '@/app/components/ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
 } from '@/app/components/ui/card';
-import { Button } from '@/app/components/ui/button';
-
 import { handleDeleteNote } from '@/app/lib/hooks';
-
 import type { UserColumn, UserNote } from '@/app/types/note';
 
 export default function Note({

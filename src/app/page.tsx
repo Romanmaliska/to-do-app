@@ -1,10 +1,8 @@
 import {
-  testDatabaseConnection,
   getSortedColumns,
+  testDatabaseConnection,
 } from '@/app/actions/notesActions';
-
 import NotesBoard from '@/app/components/notesBoard';
-
 import type { UserColumn } from '@/app/types/note';
 
 export default async function Home() {

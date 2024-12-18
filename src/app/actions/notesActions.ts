@@ -1,15 +1,14 @@
 'use server';
+import { UniqueIdentifier } from '@dnd-kit/core';
+import { ObjectId } from 'mongodb';
 import { revalidatePath } from 'next/cache';
 
 import mongoDBclient from '@/app/lib/mongodb';
-import { ObjectId } from 'mongodb';
-
 import type {
-  UserNote,
-  UserColumnDocument,
   UserColumn,
+  UserColumnDocument,
+  UserNote,
 } from '@/app/types/note';
-import { UniqueIdentifier } from '@dnd-kit/core';
 
 export async function testDatabaseConnection() {
   let isConnected = false;
