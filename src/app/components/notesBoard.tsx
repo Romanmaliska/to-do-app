@@ -21,11 +21,9 @@ import {
 import Note from '@/app/components/note';
 import NotesColumn from '@/app/components/notesColumn';
 import NotesColumnSkeleton from '@/app/components/notesColumnSkeleton';
-import { Button } from '@/app/components/ui/button';
-import { handleAddColumn } from '@/app/lib/hooks';
 import type { UserColumn, UserNote } from '@/app/types/note';
 
-import { Input } from './ui/input';
+import NewColumnButton from './newColumnButton';
 
 export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
   const [optimisticColumns, setOptimisticColumns] = useOptimistic(columns);
@@ -37,18 +35,8 @@ export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
     [columns],
   );
 
-  const [isAddColumnClicked, setIsAddColumnClicked] = useState(false);
-
   const [draggedColumn, setDraggedColumn] = useState<string | null>(null);
   const [draggedNote, setDraggedNote] = useState<string | null>(null);
-
-  const updateColumnTitle = (columnId: string, newTitle: string) => {
-    // const newColumns = columnsState.map((col) => {
-    //   if (col.columnId !== columnId) return col;
-    //   return { ...col, columnTitle: newTitle };
-    // });
-    // setColumns(newColumns);
-  };
 
   const updateNoteText = (noteId: string, newText: string) => {
     // const newNotes = notesState.map((note: any) => {
@@ -282,12 +270,6 @@ export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
     }
   };
 
-  const handleAddColumnTitle = (formData: FormData) => {
-    const columnTitle = formData.get('columnTitle') as string;
-    handleAddColumn(setOptimisticColumns, columns, columnTitle);
-    setIsAddColumnClicked(false);
-  };
-
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 4 },
@@ -310,7 +292,6 @@ export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
               column={column}
               notes={column.notes}
               setOptimisticColumns={setOptimisticColumns}
-              updateColumnTitle={updateColumnTitle}
               updateNoteText={updateNoteText}
             />
           ))}
@@ -326,18 +307,10 @@ export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
           document?.body,
         )}
       </DndContext>
-
-      {isAddColumnClicked ? (
-        <div>
-          <form action={handleAddColumnTitle}>
-            <Input autoFocus type='text' name='columnTitle'></Input>
-          </form>
-        </div>
-      ) : (
-        <Button variant='outline' onClick={() => setIsAddColumnClicked(true)}>
-          Add new column
-        </Button>
-      )}
+      <NewColumnButton
+        setOptimisticColumns={setOptimisticColumns}
+        columns={columns}
+      />
     </div>
   );
 }

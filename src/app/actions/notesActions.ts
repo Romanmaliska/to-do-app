@@ -276,3 +276,12 @@ export async function updateNote(
 
   revalidatePath('/');
 }
+
+export async function updateColumnTitle(columnId: string, columnTitle: string) {
+  await mongoDBclient
+    .db('notes')
+    .collection('notes')
+    .updateOne({ _id: new ObjectId(columnId) }, { $set: { columnTitle } });
+
+  revalidatePath('/');
+}

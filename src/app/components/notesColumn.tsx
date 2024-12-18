@@ -5,30 +5,40 @@ import { FaRegTrashAlt } from 'react-icons/fa';
 
 import { UserColumn, UserNote } from '@/app/types/note';
 
+import { updateColumnTitle } from '../actions/notesActions';
 import { handleAddNote, handleDeleteColumn } from '../lib/hooks';
 import Note from './note';
 import { Button } from './ui/button';
+import { Input } from './ui/input';
 
 type Props = {
   columns: UserColumn[];
   column: UserColumn;
   notes: UserNote[];
-  updateColumnTitle: () => void;
-  setOptimisticColumns: (columns: UserColumn[]) => void;
   updateNoteText: any;
+  setOptimisticColumns: (columns: UserColumn[]) => void;
 };
 
 export default function NotesColumn({
   columns,
   column,
   notes,
-  updateColumnTitle,
-  setOptimisticColumns,
-
   updateNoteText,
+  setOptimisticColumns,
 }: Props) {
-  const [columnTitle, setColumnTitle] = useState('');
-  const [isTitleUpdated, setIsTitleUpdate] = useState(false);
+  const [isColumnTitleUpdated, setIsColumnTitleUpdated] = useState(false);
+
+  const handleUpdateColumnTitle = (formData: FormData) => {
+    const columnTitle = formData.get('columnTitle') as string;
+    const newColumns = columns.map((col) => {
+      if (col.columnId !== column.columnId) return col;
+      return { ...col, columnTitle };
+    });
+    setIsColumnTitleUpdated(!isColumnTitleUpdated);
+    setOptimisticColumns(newColumns);
+    updateColumnTitle(column.columnId, columnTitle);
+  };
+
   const notesIds = useMemo(
     () => notes.map((note: any) => note.noteId),
     [notes],
@@ -43,7 +53,7 @@ export default function NotesColumn({
     isDragging,
   } = useSortable({
     id: column.columnId,
-    disabled: isTitleUpdated,
+    disabled: isColumnTitleUpdated,
     data: { type: 'column', column },
   });
 
@@ -71,28 +81,16 @@ export default function NotesColumn({
       <div className='h-14 cursor-grab rounded-md rounded-b-none p-3 border-spacing-4'>
         <div className='flex gap-4' {...attributes} {...listeners}>
           <div>
-            {isTitleUpdated ? (
-              <input
-                type='text'
-                minLength={1}
-                value={columnTitle}
-                onChange={(e) => setColumnTitle(e.target.value)}
-                onBlur={() => {
-                  updateColumnTitle(column.columnId, columnTitle);
-                  setIsTitleUpdate(false);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && columnTitle) {
-                    setIsTitleUpdate(false);
-                    updateColumnTitle(column.columnId, columnTitle);
-                  }
-                }}
-                autoFocus
-              />
+            {isColumnTitleUpdated ? (
+              <form action={handleUpdateColumnTitle}>
+                <Input type='text' minLength={1} name='columnTitle' autoFocus />
+              </form>
             ) : (
-              <h3 onClick={() => setIsTitleUpdate(true)}>
+              <h5
+                onClick={() => setIsColumnTitleUpdated(!isColumnTitleUpdated)}
+              >
                 {column.columnTitle}
-              </h3>
+              </h5>
             )}
           </div>
           <form
@@ -115,11 +113,11 @@ export default function NotesColumn({
           return (
             <Note
               key={note.noteId}
-              setOptimisticColumns={setOptimisticColumns}
               columns={columns}
               note={note}
               columnId={column.columnId}
               updateNoteText={updateNoteText}
+              setOptimisticColumns={setOptimisticColumns}
             />
           );
         })}
