@@ -10,12 +10,12 @@ import { handleAddNote, handleDeleteColumn } from '../lib/hooks';
 import Note from './note';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
+import NewNoteButton from './newNoteButton';
 
 type Props = {
   columns: UserColumn[];
   column: UserColumn;
   notes: UserNote[];
-  updateNoteText: any;
   setOptimisticColumns: (columns: UserColumn[]) => void;
 };
 
@@ -23,7 +23,6 @@ export default function NotesColumn({
   columns,
   column,
   notes,
-  updateNoteText,
   setOptimisticColumns,
 }: Props) {
   const [isColumnTitleUpdated, setIsColumnTitleUpdated] = useState(false);
@@ -116,23 +115,16 @@ export default function NotesColumn({
               columns={columns}
               note={note}
               columnId={column.columnId}
-              updateNoteText={updateNoteText}
               setOptimisticColumns={setOptimisticColumns}
             />
           );
         })}
       </SortableContext>
-
-      <form
-        action={handleAddNote.bind(
-          null,
-          setOptimisticColumns,
-          column.columnId,
-          columns,
-        )}
-      >
-        <Button variant='outline'>Add Note</Button>
-      </form>
+      <NewNoteButton
+        setOptimisticColumns={setOptimisticColumns}
+        columns={columns}
+        columnId={column.columnId}
+      />
     </div>
   );
 }

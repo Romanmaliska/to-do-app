@@ -14,21 +14,29 @@ import {
 import { handleDeleteNote } from '@/app/lib/hooks';
 import type { UserColumn, UserNote } from '@/app/types/note';
 
+import { Input } from './ui/input';
+
 export default function Note({
   note,
   columns,
   columnId,
-  updateNoteText,
   setOptimisticColumns,
 }: {
   note: UserNote;
   columns: UserColumn[];
   columnId: string;
-  updateNoteText: any;
   setOptimisticColumns: (columns: UserColumn[]) => void;
 }) {
   const [noteText, setNoteText] = useState('');
   const [isNoteUpdated, setIsNoteUpdated] = useState(false);
+
+  const updateNoteText = (noteId: string, newText: string) => {
+    // const newNotes = notesState.map((note: any) => {
+    //   if (note.noteId !== noteId) return note;
+    //   return { ...note, noteText: newText };
+    // });
+    // setNotes(newNotes);
+  };
 
   const {
     setNodeRef,
@@ -46,10 +54,6 @@ export default function Note({
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-  };
-
-  const toggleUpdateNote = () => {
-    setIsNoteUpdated((prev) => !prev);
   };
 
   if (isDragging) {
@@ -70,29 +74,26 @@ export default function Note({
     >
       <div className='flex flex-col gap-8'>
         <div className='flex gap-4 place-content-end'>
-          <h1>{note.noteId}</h1>
-          {/* {isNoteUpdated ? (
-            <textarea
+          {isNoteUpdated ? (
+            <Input
               value={noteText}
               onChange={(e) => setNoteText(e.target.value)}
               onBlur={() => {
-                toggleUpdateNote();
                 updateNoteText(note.noteId, noteText);
               }}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
-                  toggleUpdateNote();
                   updateNoteText(note.noteId, noteText);
                 }
               }}
               autoFocus
             />
           ) : (
-            <p onClick={() => toggleUpdateNote()}>{note.noteText}</p>
-          )} */}
+            <p onClick={() => {}}>{note.noteText}</p>
+          )}
         </div>
 
-        <form
+        {/* <form
           action={handleDeleteNote.bind(
             null,
             setOptimisticColumns,
@@ -104,7 +105,7 @@ export default function Note({
           <Button variant='destructive' size='sm'>
             Delete
           </Button>
-        </form>
+        </form> */}
       </div>
     </div>
   );

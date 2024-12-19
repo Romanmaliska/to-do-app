@@ -43,11 +43,12 @@ export async function handleDeleteColumn(
 
 export async function handleAddNote(
   setOptimisticColumns: (columns: UserColumn[]) => void,
-  columnId: string,
   columns: UserColumn[],
+  columnId: string,
+  noteText: string,
 ) {
   const newNote = {
-    noteText: generateId().toString(),
+    noteText,
     noteId: generateId(),
     noteIndex:
       columns.find((col) => col.columnId === columnId)?.notes.length || 0,

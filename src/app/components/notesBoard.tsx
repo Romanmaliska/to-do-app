@@ -13,7 +13,7 @@ import { useMemo, useOptimistic, useState, useTransition } from 'react';
 import { createPortal } from 'react-dom';
 
 import {
-  moveNoteToNewColumn,
+  moveNoteToEmptyColumn,
   updateColumnsPosition,
   updateNotePositionInsideColumn,
   updateNotePositionOutsideColumn,
@@ -24,6 +24,7 @@ import NotesColumnSkeleton from '@/app/components/notesColumnSkeleton';
 import type { UserColumn, UserNote } from '@/app/types/note';
 
 import NewColumnButton from './newColumnButton';
+import NoteSkeleton from './noteSkeleton';
 
 export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
   const [optimisticColumns, setOptimisticColumns] = useOptimistic(columns);
@@ -38,14 +39,6 @@ export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
   const [draggedColumn, setDraggedColumn] = useState<string | null>(null);
   const [draggedNote, setDraggedNote] = useState<string | null>(null);
 
-  const updateNoteText = (noteId: string, newText: string) => {
-    // const newNotes = notesState.map((note: any) => {
-    //   if (note.noteId !== noteId) return note;
-    //   return { ...note, noteText: newText };
-    // });
-    // setNotes(newNotes);
-  };
-
   const handleDragStart = (event: DragStartEvent) => {
     if (event.active.data?.current?.type === 'column') {
       setDraggedColumn(event.active.data.current.column);
@@ -57,10 +50,13 @@ export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
     }
   };
 
-  const handleColumnDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = (event: DragEndEvent) => {
+    handleColumnDragEnd(event);
     setDraggedNote(null);
     setDraggedColumn(null);
+  };
 
+  const handleColumnDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
     if (!over || active.id === over.id) return;
@@ -88,6 +84,9 @@ export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
   const handleNoteDragOver = (event: DragOverEvent) => {
     const { active, over } = event;
     if (!over) return;
+
+    console.log('active', active);
+    console.log('over', over);
 
     const activeId = active.id as string;
     const overId = over.id as string;
@@ -209,6 +208,7 @@ export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
             activeNoteIndex,
             overNoteIndex,
             activeNoteId: activeId,
+            activeNoteText: activeNote.noteText,
           });
         });
 
@@ -216,7 +216,7 @@ export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
       }
     }
 
-    // dropped note on column
+    // dropped note on empty column
     if (isOverColumn) {
       const activeColumnIndex = columns.findIndex((col) =>
         col.notes.find((note) => note.noteId === activeId),
@@ -260,9 +260,10 @@ export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
           })),
         );
 
-        await moveNoteToNewColumn({
+        await moveNoteToEmptyColumn({
           activeColumnId: columns[activeColumnIndex].columnId,
           activeNoteIndex,
+          activeNoteText: activeNote.noteText,
           activeNoteId: activeId,
           overColumnId: overId,
         });
@@ -281,7 +282,7 @@ export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
       <DndContext
         onDragStart={handleDragStart}
         onDragOver={handleNoteDragOver}
-        onDragEnd={handleColumnDragEnd}
+        onDragEnd={handleDragEnd}
         sensors={sensors}
       >
         <SortableContext items={columnsIds}>
@@ -292,7 +293,6 @@ export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
               column={column}
               notes={column.notes}
               setOptimisticColumns={setOptimisticColumns}
-              updateNoteText={updateNoteText}
             />
           ))}
         </SortableContext>
@@ -300,9 +300,7 @@ export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
         {createPortal(
           <DragOverlay>
             {draggedColumn && <NotesColumnSkeleton />}
-            {draggedNote && (
-              <Note note={draggedNote} updateNoteText={updateNoteText} />
-            )}
+            {draggedNote && <NoteSkeleton />}
           </DragOverlay>,
           document?.body,
         )}

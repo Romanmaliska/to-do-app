@@ -1,4 +1,5 @@
 'use server';
+
 import { UniqueIdentifier } from '@dnd-kit/core';
 import { ObjectId } from 'mongodb';
 import { revalidatePath } from 'next/cache';
@@ -156,111 +157,180 @@ export async function updateNotePositionOutsideColumn({
   activeNoteIndex,
   overNoteIndex,
   activeNoteId,
+  activeNoteText,
 }: {
   activeColumnId: string;
   activeNoteIndex: number;
   overColumnId: string;
   overNoteIndex: number;
   activeNoteId: string;
+  activeNoteText: string;
 }) {
   const collection = mongoDBclient.db('notes').collection('notes');
 
-  // Update active column
-  await collection.updateOne(
-    { _id: new ObjectId(activeColumnId) },
-    {
-      $set: {
-        'notes.$[note].noteIndex': {
-          $cond: {
-            if: { $lt: ['$noteIndex', activeNoteIndex] },
-            then: '$noteIndex',
-            else: { $subtract: ['$noteIndex', 1] },
-          },
-        },
-      },
-    },
-    { arrayFilters: [{ 'note.noteId': { $ne: activeNoteId } }] },
-  );
-
   // Remove the note from the active column
-  await collection.updateOne(
-    { _id: new ObjectId(activeColumnId) },
-    { $pull: { notes: { noteId: activeNoteId } } },
-  );
-
-  // Update over column
-  await collection.updateOne(
-    { _id: new ObjectId(overColumnId) },
+  // Update active column indexes
+  await collection.updateOne({ _id: new ObjectId(activeColumnId) }, [
     {
       $set: {
-        'notes.$[note].noteIndex': {
-          $cond: {
-            if: { $lt: ['$noteIndex', overNoteIndex] },
-            then: '$noteIndex',
-            else: { $add: ['$noteIndex', 1] },
+        notes: {
+          $filter: {
+            input: '$notes',
+            as: 'note',
+            cond: { $ne: ['$$note.noteId', activeNoteId] }, // Exclude the note to be removed
           },
         },
       },
     },
-    { arrayFilters: [{ 'note.noteId': { $ne: activeNoteId } }] },
-  );
-
-  // Add the note to the over column
-  await collection.updateOne(
-    { _id: new ObjectId(overColumnId) },
     {
-      $push: {
+      $set: {
         notes: {
-          $each: [{ noteId: activeNoteId, noteIndex: overNoteIndex }],
-          $position: overNoteIndex,
+          $map: {
+            input: '$notes',
+            as: 'note',
+            in: {
+              $mergeObjects: [
+                '$$note',
+                {
+                  noteIndex: {
+                    $cond: [
+                      { $lt: ['$$note.noteIndex', activeNoteIndex] },
+                      '$$note.noteIndex',
+                      { $subtract: ['$$note.noteIndex', 1] },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
         },
       },
     },
-  );
+  ]);
+
+  // Update over column indexes
+  // Add the note to the over column
+  await collection.updateOne({ _id: new ObjectId(overColumnId) }, [
+    {
+      $set: {
+        notes: {
+          $concatArrays: [
+            {
+              $map: {
+                input: '$notes',
+                as: 'note',
+                in: {
+                  $mergeObjects: [
+                    '$$note',
+                    {
+                      noteIndex: {
+                        $cond: [
+                          { $lt: ['$$note.noteIndex', overNoteIndex] },
+                          '$$note.noteIndex',
+                          { $add: ['$$note.noteIndex', 1] },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            [
+              {
+                noteId: activeNoteId,
+                noteIndex: overNoteIndex,
+                noteText: activeNoteText,
+              },
+            ],
+          ],
+        },
+      },
+    },
+  ]);
 
   revalidatePath('/');
 }
 
-export async function moveNoteToNewColumn({
+export async function moveNoteToEmptyColumn({
   activeColumnId,
   overColumnId,
   activeNoteId,
   activeNoteIndex,
+  activeNoteText,
 }: {
   activeColumnId: string;
   overColumnId: string;
   activeNoteId: string;
   activeNoteIndex: number;
+  activeNoteText: string;
 }) {
   const collection = mongoDBclient.db('notes').collection('notes');
 
-  // Update noteIndex in the active column
-  await collection.updateOne(
-    { _id: new ObjectId(activeColumnId) },
+  await collection.bulkWrite([
+    // Decrement `noteIndex` for notes in the active column and remove the note
     {
-      $inc: { 'notes.$[note].noteIndex': -1 },
+      updateOne: {
+        filter: { _id: new ObjectId(activeColumnId) },
+        update: [
+          {
+            $set: {
+              notes: {
+                $filter: {
+                  input: {
+                    $map: {
+                      input: '$notes',
+                      as: 'note', // Define the variable as "note"
+                      in: {
+                        $mergeObjects: [
+                          '$$note',
+                          {
+                            noteIndex: {
+                              $cond: [
+                                {
+                                  $and: [
+                                    {
+                                      $gt: [
+                                        '$$note.noteIndex',
+                                        activeNoteIndex,
+                                      ],
+                                    },
+                                    { $ne: ['$$note.noteId', activeNoteId] },
+                                  ],
+                                },
+                                { $subtract: ['$$note.noteIndex', 1] },
+                                '$$note.noteIndex',
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  },
+                  as: 'note', // Define the variable for $filter
+                  cond: { $ne: ['$$note.noteId', activeNoteId] }, // Exclude the note with activeNoteId
+                },
+              },
+            },
+          },
+        ],
+      },
     },
-    { arrayFilters: [{ 'note.noteIndex': { $gt: activeNoteIndex } }] },
-  );
-
-  // Remove the note from the active column
-  await collection.updateOne(
-    { _id: new ObjectId(activeColumnId) },
-    { $pull: { notes: { noteId: activeNoteId } } },
-  );
-
-  // Add the note to the new column with noteIndex 0
-  await collection.updateOne(
-    { _id: new ObjectId(overColumnId) },
+    // Add the note to the target column
     {
-      $push: {
-        notes: {
-          $each: [{ noteId: activeNoteId, noteIndex: 0 }],
-          $position: 0,
+      updateOne: {
+        filter: { _id: new ObjectId(overColumnId) },
+        update: {
+          $push: {
+            notes: {
+              noteId: activeNoteId,
+              noteIndex: 0,
+              noteText: activeNoteText,
+            },
+          },
         },
       },
     },
-  );
+  ]);
 
   revalidatePath('/');
 }

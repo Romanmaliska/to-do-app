@@ -12,6 +12,7 @@ export default async function Home() {
   }
 
   const columns: UserColumn[] = await getSortedColumns();
+  console.log(columns);
 
   return (
     <main className='w-full overflow-x-auto overflow-y-hidden px-8'>
