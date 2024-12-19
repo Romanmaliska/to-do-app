@@ -18,7 +18,6 @@ import {
   updateNotePositionInsideColumn,
   updateNotePositionOutsideColumn,
 } from '@/app/actions/notesActions';
-import Note from '@/app/components/note';
 import NotesColumn from '@/app/components/notesColumn';
 import NotesColumnSkeleton from '@/app/components/notesColumnSkeleton';
 import type { UserColumn, UserNote } from '@/app/types/note';
@@ -278,7 +277,7 @@ export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
   );
 
   return (
-    <div className='flex m-auto gap-4'>
+    <div className='flex gap-4'>
       <DndContext
         onDragStart={handleDragStart}
         onDragOver={handleNoteDragOver}

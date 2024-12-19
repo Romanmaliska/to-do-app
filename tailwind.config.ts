@@ -9,9 +9,14 @@ const config: Config = {
   ],
   theme: {
     colors: {
-      black: '#3A4049',
-      white: '#FAFAFA',
-      gold: '#D6BB6E',
+      black: '#223556',
+      white: '#FFFFFF',
+      blue: '#0079BF',
+      lighterBlue: '#3394CC',
+      lightBlue: '#FFFFFF3d',
+      darkBlue: '#005C91',
+      grey: '#F1F2F4',
+      purple: '#131F27',
       silver: '#C4C4C4',
     },
     extend: {

@@ -1,9 +1,10 @@
 import { useState } from 'react';
-
 import { handleAddColumn } from '../lib/hooks';
 import { UserColumn } from '../types/note';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
+import { BsPlus } from 'react-icons/bs';
+import { IoClose } from 'react-icons/io5';
 
 type Props = {
   columns: UserColumn[];
@@ -22,23 +23,41 @@ export default function NewColumnButton({
     setIsAddColumnClicked(false);
   };
 
-  return isAddColumnClicked ? (
-    <div>
-      <form action={handleAddColumnTitle}>
-        <Input autoFocus type='text' minLength={1} name='columnTitle'></Input>
-        <Button>Add Column</Button>
+  return (
+    <div className='w-52'>
+      {isAddColumnClicked ? (
+        <form className='bg-grey p-2 rounded-xl' action={handleAddColumnTitle}>
+          <Input
+            className='mb-2 border-0 rounded-md focus-visible:ring-blue'
+            autoFocus
+            type='text'
+            minLength={2}
+            name='columnTitle'
+          ></Input>
+          <div className='flex justify-between items-center gap-2'>
+            <Button className='bg-blue  hover:bg-lighterBlue'>
+              Add Column
+            </Button>
+            <IoClose
+              className=' cursor-pointer'
+              size={24}
+              onClick={(e) => {
+                e.preventDefault();
+                setIsAddColumnClicked(false);
+              }}
+            />
+          </div>
+        </form>
+      ) : (
         <Button
-          onClick={(e) => {
-            e.preventDefault(), setIsAddColumnClicked(false);
-          }}
+          className='flex justify-start gap-2 p-2 w-52 border-0 rounded-xl bg-lightBlue text-white cursor-pointer hover:text-white hover:bg-lighterBlue'
+          variant='outline'
+          onClick={() => setIsAddColumnClicked(true)}
         >
-          x
+          <BsPlus />
+          Add new column
         </Button>
-      </form>
+      )}
     </div>
-  ) : (
-    <Button variant='outline' onClick={() => setIsAddColumnClicked(true)}>
-      Add new column
-    </Button>
   );
 }
