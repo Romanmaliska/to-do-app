@@ -25,14 +25,20 @@ export default function NewNoteButton({
   };
 
   return isAddNoteClicked ? (
-    <div>
-      <form action={handleAddNoteText}>
-        <Input autoFocus type='text' name='noteText'></Input>
-      </form>
-    </div>
+    <form action={handleAddNoteText}>
+      <Input autoFocus type='text' minLength={1} name='noteText'></Input>
+      <Button>Add Note</Button>
+      <Button
+        onClick={(e) => {
+          e.preventDefault(), setIsAddNoteClicked(false);
+        }}
+      >
+        x
+      </Button>
+    </form>
   ) : (
     <Button variant='outline' onClick={() => setIsAddNoteClicked(true)}>
-      Add new column
+      Add a note
     </Button>
   );
 }

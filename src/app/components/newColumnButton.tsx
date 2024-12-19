@@ -25,7 +25,15 @@ export default function NewColumnButton({
   return isAddColumnClicked ? (
     <div>
       <form action={handleAddColumnTitle}>
-        <Input autoFocus type='text' name='columnTitle'></Input>
+        <Input autoFocus type='text' minLength={1} name='columnTitle'></Input>
+        <Button>Add Column</Button>
+        <Button
+          onClick={(e) => {
+            e.preventDefault(), setIsAddColumnClicked(false);
+          }}
+        >
+          x
+        </Button>
       </form>
     </div>
   ) : (
