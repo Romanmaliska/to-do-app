@@ -12,7 +12,7 @@ type Props = {
   setOptimisticColumns: (columns: UserColumn[]) => void;
 };
 
-export default function NewColumnButton({
+export default function AddColumnButton({
   columns,
   setOptimisticColumns,
 }: Props) {
@@ -37,9 +37,7 @@ export default function NewColumnButton({
             name='columnTitle'
           ></Input>
           <div className='flex justify-between items-center gap-2'>
-            <Button className='bg-blue  hover:bg-lighterBlue'>
-              Add Column
-            </Button>
+            <Button className='bg-blue hover:bg-lighterBlue'>Add column</Button>
             <IoClose
               className=' cursor-pointer'
               size={24}
@@ -56,7 +54,7 @@ export default function NewColumnButton({
           variant='outline'
           onClick={() => setIsAddColumnClicked(true)}
         >
-          <BsPlus />
+          <BsPlus size={18} />
           Add new column
         </Button>
       )}

@@ -77,7 +77,7 @@ export default function NotesColumnHeader({
           columns,
         )}
       >
-        <FaRegTrashAlt />
+        <FaRegTrashAlt size={12} />
       </form>
     </div>
   );

@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 
 import { UserColumn, UserNote } from '@/app/types/note';
 
-import NewNoteButton from './newNoteButton';
+import AddNoteButton from './addNoteButton';
 import Note from './note';
 import NotesColumnHeader from './notesColumnHeader';
 
@@ -82,7 +82,7 @@ export default function NotesColumn({
         })}
       </SortableContext>
 
-      <NewNoteButton
+      <AddNoteButton
         setOptimisticColumns={setOptimisticColumns}
         columns={columns}
         columnId={column.columnId}

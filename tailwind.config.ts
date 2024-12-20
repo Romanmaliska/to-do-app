@@ -16,8 +16,8 @@ const config: Config = {
       lightBlue: '#FFFFFF3d',
       darkBlue: '#005C91',
       grey: '#F1F2F4',
+      darkGrey: '#D0D4DB',
       purple: '#131F27',
-      silver: '#C4C4C4',
     },
     extend: {
       borderRadius: {

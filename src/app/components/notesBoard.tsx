@@ -22,7 +22,7 @@ import NotesColumn from '@/app/components/notesColumn';
 import NotesColumnSkeleton from '@/app/components/notesColumnSkeleton';
 import type { UserColumn, UserNote } from '@/app/types/note';
 
-import NewColumnButton from './newColumnButton';
+import AddColumnButton from './addColumnButton';
 import NoteSkeleton from './noteSkeleton';
 
 export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
@@ -304,7 +304,7 @@ export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
         )}
       </DndContext>
 
-      <NewColumnButton
+      <AddColumnButton
         setOptimisticColumns={setOptimisticColumns}
         columns={columns}
       />

@@ -72,26 +72,25 @@ export default function Note({
       {...listeners}
       {...attributes}
     >
-      <div className='flex flex-col gap-8'>
-        {isNoteUpdated ? (
-          <Input
-            value={noteText}
-            onChange={(e) => setNoteText(e.target.value)}
-            onBlur={() => {
+      {isNoteUpdated ? (
+        <Input
+          value={noteText}
+          onChange={(e) => setNoteText(e.target.value)}
+          onBlur={() => {
+            updateNoteText(note.noteId, noteText);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
               updateNoteText(note.noteId, noteText);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                updateNoteText(note.noteId, noteText);
-              }
-            }}
-            autoFocus
-          />
-        ) : (
-          <p onClick={() => {}}>{note.noteText}</p>
-        )}
+            }
+          }}
+          autoFocus
+        />
+      ) : (
+        <p onClick={() => {}}>{note.noteText}</p>
+      )}
 
-        {/* <form
+      {/* <form
           action={handleDeleteNote.bind(
             null,
             setOptimisticColumns,
@@ -104,7 +103,6 @@ export default function Note({
             Delete
           </Button>
         </form> */}
-      </div>
     </div>
   );
 }
