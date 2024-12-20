@@ -295,15 +295,15 @@ export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
             />
           ))}
         </SortableContext>
-
         {createPortal(
           <DragOverlay>
             {draggedColumn && <NotesColumnSkeleton />}
             {draggedNote && <NoteSkeleton />}
           </DragOverlay>,
-          document?.body,
+          document.body,
         )}
       </DndContext>
+
       <NewColumnButton
         setOptimisticColumns={setOptimisticColumns}
         columns={columns}

@@ -1,3 +1,3 @@
 export default function NotesColumnSkeleton() {
-  return <div className='w-20 h-20 bg-black'></div>;
+  return <div className='flex flex-col w-52 h-16 rounded-xl bg-grey p-2'></div>;
 }

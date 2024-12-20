@@ -66,32 +66,30 @@ export default function Note({
 
   return (
     <div
-      className='m-2 md:m-4'
+      className='py-1'
       ref={setNodeRef}
       style={style}
       {...listeners}
       {...attributes}
     >
       <div className='flex flex-col gap-8'>
-        <div className='flex gap-4 place-content-end'>
-          {isNoteUpdated ? (
-            <Input
-              value={noteText}
-              onChange={(e) => setNoteText(e.target.value)}
-              onBlur={() => {
+        {isNoteUpdated ? (
+          <Input
+            value={noteText}
+            onChange={(e) => setNoteText(e.target.value)}
+            onBlur={() => {
+              updateNoteText(note.noteId, noteText);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
                 updateNoteText(note.noteId, noteText);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  updateNoteText(note.noteId, noteText);
-                }
-              }}
-              autoFocus
-            />
-          ) : (
-            <p onClick={() => {}}>{note.noteText}</p>
-          )}
-        </div>
+              }
+            }}
+            autoFocus
+          />
+        ) : (
+          <p onClick={() => {}}>{note.noteText}</p>
+        )}
 
         {/* <form
           action={handleDeleteNote.bind(

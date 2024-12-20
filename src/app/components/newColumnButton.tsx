@@ -1,10 +1,11 @@
 import { useState } from 'react';
+import { BsPlus } from 'react-icons/bs';
+import { IoClose } from 'react-icons/io5';
+
 import { handleAddColumn } from '../lib/hooks';
 import { UserColumn } from '../types/note';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { BsPlus } from 'react-icons/bs';
-import { IoClose } from 'react-icons/io5';
 
 type Props = {
   columns: UserColumn[];
@@ -30,8 +31,9 @@ export default function NewColumnButton({
           <Input
             className='mb-2 border-0 rounded-md focus-visible:ring-blue'
             autoFocus
+            required
             type='text'
-            minLength={2}
+            minLength={1}
             name='columnTitle'
           ></Input>
           <div className='flex justify-between items-center gap-2'>
