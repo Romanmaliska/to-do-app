@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { FocusEvent,useState, useTransition } from 'react';
 import { BsPlus } from 'react-icons/bs';
 
 import { handleAddNote } from '../lib/hooks';
@@ -18,23 +18,39 @@ export default function AddNoteButton({
   columns,
   columnId,
 }: Props) {
+  const [_, startTransition] = useTransition();
   const [isAddNoteClicked, setIsAddNoteClicked] = useState(false);
 
-  const handleAddNoteText = (formData: FormData) => {
-    const noteText = formData.get('noteText') as string;
-    handleAddNote(setOptimisticColumns, columns, columnId, noteText);
-    setIsAddNoteClicked(false);
+  const handleAddNoteText = async (noteText: string) => {
+    setIsAddNoteClicked(!isAddNoteClicked);
+
+    if (!noteText) return;
+
+    await handleAddNote(setOptimisticColumns, columns, columnId, noteText);
+  };
+
+  const handleBlur = (event: FocusEvent<HTMLInputElement>) => {
+    startTransition(async () => {
+      await handleAddNoteText(event.target.value);
+    });
+  };
+
+  const handleSubmit = async (formData: FormData) => {
+    const columnTitle = formData.get('noteText') as string;
+    await handleAddNoteText(columnTitle);
   };
 
   return isAddNoteClicked ? (
-    <form action={handleAddNoteText}>
+    <form action={handleSubmit}>
       <Input
-        className='mb-2 border-0 rounded-md focus-visible:ring-blue'
+        className='mb-2 mt-1 border-0 rounded-md focus-visible:ring-blue'
+        onBlur={handleBlur}
         name='noteText'
         type='text'
         autoFocus
         minLength={1}
         required
+        autoComplete='off'
       ></Input>
       <div className='flex justify-between items-center gap-2'>
         <Button className='bg-blue hover:bg-lighterBlue'>Add note</Button>
@@ -43,7 +59,7 @@ export default function AddNoteButton({
     </form>
   ) : (
     <Button
-      className='flex items-center justify-start gap-1 h-9 pl-3 hover:bg-darkGrey'
+      className='flex items-center justify-start gap-1 mt-1 h-9 pl-3 hover:bg-darkGrey'
       variant='ghost'
       onClick={() => setIsAddNoteClicked(!isAddNoteClicked)}
     >

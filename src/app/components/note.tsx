@@ -4,17 +4,9 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useState } from 'react';
 
-import { Button } from '@/app/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-} from '@/app/components/ui/card';
-import { handleDeleteNote } from '@/app/lib/hooks';
 import type { UserColumn, UserNote } from '@/app/types/note';
 
-import { Input } from './ui/input';
+import UpdateNoteButton from './updateNoteButton';
 
 export default function Note({
   note,
@@ -27,16 +19,7 @@ export default function Note({
   columnId: string;
   setOptimisticColumns: (columns: UserColumn[]) => void;
 }) {
-  const [noteText, setNoteText] = useState('');
   const [isNoteUpdated, setIsNoteUpdated] = useState(false);
-
-  const updateNoteText = (noteId: string, newText: string) => {
-    // const newNotes = notesState.map((note: any) => {
-    //   if (note.noteId !== noteId) return note;
-    //   return { ...note, noteText: newText };
-    // });
-    // setNotes(newNotes);
-  };
 
   const {
     setNodeRef,
@@ -58,51 +41,35 @@ export default function Note({
 
   if (isDragging) {
     return (
-      <div className='m-2 md:m-4' ref={setNodeRef} style={style}>
-        is draging
-      </div>
+      <div
+        className='h-9 m-1 px-4 py-2 bg-darkGrey bg-opacity-50 rounded-lg'
+        ref={setNodeRef}
+        style={style}
+      ></div>
     );
   }
 
   return (
     <div
-      className='py-1'
+      className='m-1 px-4 py-2 bg-white rounded-lg focus-visible:ring-blue'
       ref={setNodeRef}
       style={style}
       {...listeners}
       {...attributes}
     >
       {isNoteUpdated ? (
-        <Input
-          value={noteText}
-          onChange={(e) => setNoteText(e.target.value)}
-          onBlur={() => {
-            updateNoteText(note.noteId, noteText);
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              updateNoteText(note.noteId, noteText);
-            }
-          }}
-          autoFocus
+        <UpdateNoteButton
+          setOptimisticColumns={setOptimisticColumns}
+          setIsNoteUpdated={setIsNoteUpdated}
+          columns={columns}
+          columnId={columnId}
+          note={note}
         />
       ) : (
-        <p onClick={() => {}}>{note.noteText}</p>
+        <p className='' onClick={() => setIsNoteUpdated(!isNoteUpdated)}>
+          {note.noteText}
+        </p>
       )}
-
-      {/* <form
-          action={handleDeleteNote.bind(
-            null,
-            setOptimisticColumns,
-            columnId,
-            columns,
-            note.noteId,
-          )}
-        >
-          <Button variant='destructive' size='sm'>
-            Delete
-          </Button>
-        </form> */}
     </div>
   );
 }

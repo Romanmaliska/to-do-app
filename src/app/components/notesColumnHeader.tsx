@@ -4,6 +4,7 @@ import { FaRegTrashAlt } from 'react-icons/fa';
 import { updateColumnTitle } from '../actions/notesActions';
 import { handleDeleteColumn } from '../lib/hooks';
 import { UserColumn } from '../types/note';
+import { Button } from './ui/button';
 import { Input } from './ui/input';
 
 type Props = {
@@ -49,7 +50,7 @@ export default function NotesColumnHeader({
       {isColumnTitleUpdated ? (
         <form action={handleSubmit}>
           <Input
-            className='text-base p-2 border-0 rounded-md focus-visible:ring-blue'
+            className='min-w-32 text-base p-2 border-0 rounded-md focus-visible:ring-blue'
             onBlur={handleBlur}
             type='text'
             defaultValue={column.columnTitle}
@@ -62,7 +63,7 @@ export default function NotesColumnHeader({
         </form>
       ) : (
         <h1
-          className='p-2 min-w-32'
+          className='p-2 min-w-32 rounded-md'
           onClick={() => setIsColumnTitleUpdated(!isColumnTitleUpdated)}
         >
           {column.columnTitle}
@@ -77,7 +78,9 @@ export default function NotesColumnHeader({
           columns,
         )}
       >
-        <FaRegTrashAlt size={12} />
+        <Button className='hover:bg-darkGrey' variant='ghost'>
+          <FaRegTrashAlt size={12} />
+        </Button>
       </form>
     </div>
   );

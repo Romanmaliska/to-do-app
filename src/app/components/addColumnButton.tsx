@@ -5,6 +5,7 @@ import { IoClose } from 'react-icons/io5';
 import { handleAddColumn } from '../lib/hooks';
 import { UserColumn } from '../types/note';
 import { Button } from './ui/button';
+import CloseButton from './ui/closeButton';
 import { Input } from './ui/input';
 
 type Props = {
@@ -18,10 +19,11 @@ export default function AddColumnButton({
 }: Props) {
   const [isAddColumnClicked, setIsAddColumnClicked] = useState(false);
 
-  const handleAddColumnTitle = (formData: FormData) => {
-    const columnTitle = formData.get('columnTitle') as string;
-    handleAddColumn(setOptimisticColumns, columns, columnTitle);
+  const handleAddColumnTitle = async (formData: FormData) => {
     setIsAddColumnClicked(false);
+
+    const columnTitle = formData.get('columnTitle') as string;
+    await handleAddColumn(setOptimisticColumns, columns, columnTitle);
   };
 
   return (
@@ -30,22 +32,15 @@ export default function AddColumnButton({
         <form className='bg-grey p-2 rounded-xl' action={handleAddColumnTitle}>
           <Input
             className='mb-2 border-0 rounded-md focus-visible:ring-blue'
-            autoFocus
-            required
             type='text'
             minLength={1}
             name='columnTitle'
+            autoFocus
+            required
           ></Input>
           <div className='flex justify-between items-center gap-2'>
             <Button className='bg-blue hover:bg-lighterBlue'>Add column</Button>
-            <IoClose
-              className=' cursor-pointer'
-              size={24}
-              onClick={(e) => {
-                e.preventDefault();
-                setIsAddColumnClicked(false);
-              }}
-            />
+            <CloseButton handleClick={setIsAddColumnClicked} />
           </div>
         </form>
       ) : (
