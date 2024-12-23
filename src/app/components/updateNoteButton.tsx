@@ -1,7 +1,6 @@
-import { FocusEvent, useTransition } from 'react';
-import { set } from 'react-hook-form';
+import { FocusEvent, MouseEvent, useTransition } from 'react';
 
-import { updateNote } from '../actions/notesActions';
+import { deleteNote,updateNote } from '../actions/notesActions';
 import { UserColumn, UserNote } from '../types/note';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -24,8 +23,6 @@ export default function UpdateNoteButton({
   const [_, startTransition] = useTransition();
 
   const handleUpdateNoteText = async (noteText: string) => {
-    setIsNoteUpdated(false);
-
     if (!noteText || note.noteText === noteText) return;
 
     const column = columns.find((col) => col.columnId === columnId);
@@ -50,18 +47,34 @@ export default function UpdateNoteButton({
   };
 
   const handleBlur = (event: FocusEvent<HTMLInputElement>) => {
-    startTransition(async () => {
-      await handleUpdateNoteText(event.target.value);
-    });
-  };
+    event.preventDefault();
+    setIsNoteUpdated(false);
 
-  const handleSubmit = async (formData: FormData) => {
-    const columnTitle = formData.get('noteText') as string;
-    await handleUpdateNoteText(columnTitle);
+    const relatedTarget = (event.relatedTarget as HTMLElement)?.id;
+
+    if (relatedTarget === 'saveButton') {
+      const noteText = (event.target as HTMLButtonElement).form?.noteText.value;
+      startTransition(async () => {
+        await handleUpdateNoteText(noteText);
+      });
+    }
+
+    if (relatedTarget === 'deleteButton') {
+      const newColumns = columns.map((col) => ({
+        ...col,
+        notes: col.notes.filter((n) => n.noteId !== note.noteId),
+      }));
+      console.log({ object: newColumns });
+
+      startTransition(async () => {
+        setOptimisticColumns(newColumns);
+        await deleteNote(columnId, note.noteId);
+      });
+    }
   };
 
   return (
-    <form action={handleSubmit}>
+    <form>
       <Input
         className='mb-2 mt-1 border-0 rounded-md focus-visible:ring-blue'
         onBlur={handleBlur}
@@ -74,7 +87,12 @@ export default function UpdateNoteButton({
         autoComplete='off'
       ></Input>
       <div className='flex justify-between items-center gap-2'>
-        <Button className='bg-blue hover:bg-lighterBlue'>Save</Button>
+        <Button className='bg-blue hover:bg-lighterBlue' id='saveButton'>
+          Save
+        </Button>
+        <Button variant='destructive' id='deleteButton'>
+          Delete
+        </Button>
       </div>
     </form>
   );

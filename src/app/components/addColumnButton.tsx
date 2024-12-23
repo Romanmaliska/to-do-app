@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { BsPlus } from 'react-icons/bs';
-import { IoClose } from 'react-icons/io5';
 
 import { handleAddColumn } from '../lib/hooks';
 import { UserColumn } from '../types/note';

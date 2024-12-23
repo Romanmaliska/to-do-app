@@ -66,9 +66,7 @@ export default function Note({
           note={note}
         />
       ) : (
-        <p className='' onClick={() => setIsNoteUpdated(!isNoteUpdated)}>
-          {note.noteText}
-        </p>
+        <p onClick={() => setIsNoteUpdated(!isNoteUpdated)}>{note.noteText}</p>
       )}
     </div>
   );

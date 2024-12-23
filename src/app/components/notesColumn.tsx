@@ -56,7 +56,7 @@ export default function NotesColumn({
 
   return (
     <div
-      className='flex flex-col w-52 rounded-xl bg-grey p-2'
+      className='flex flex-col w-52 h-fit rounded-xl bg-grey p-2'
       style={style}
       ref={setNodeRef}
     >

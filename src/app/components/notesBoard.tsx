@@ -297,8 +297,10 @@ export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
         </SortableContext>
         {createPortal(
           <DragOverlay>
-            {draggedColumn && <NotesColumnSkeleton />}
-            {draggedNote && <NoteSkeleton />}
+            {draggedColumn && (
+              <NotesColumnSkeleton draggedColumn={draggedColumn} />
+            )}
+            {draggedNote && <NoteSkeleton draggedNote={draggedNote} />}
           </DragOverlay>,
           document.body,
         )}
