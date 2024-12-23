@@ -4,8 +4,8 @@
 
 body,
 html {
-  background-color: #f9fafa;
-  color: #20303c;
+  background-color: #0079bf;
+  color: #223556;
   margin: 0;
   padding: 0;
 }
@@ -73,17 +73,4 @@ html {
   body {
     @apply bg-background text-foreground;
   }
-}
-
-::--webkit-scrollbar {
-  width: 4px;
-}
-
-::-webkit-scrollbar:horizontal {
-  height: 8px;
-}
-
-::-webkit-scrollbar-thumb {
-  background-color: #be123c; /* Equivalent to bg-rose-900 */
-  border-radius: 1rem; /* Equivalent to rounded-xl */
 }

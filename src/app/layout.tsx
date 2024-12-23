@@ -22,13 +22,13 @@ export default function RootLayout({
       <body
         className={clsx(
           inter.className,
-          'flex flex-col h-screen max-w-[2160px] mx-auto antialiase  bg-blue  text-black',
+          'flex flex-col mx-auto antialiased',
         )}
       >
         <header className='flex flex-2 p-2 bg-darkBlue'>
           <Navbar />
         </header>
-        <main className='flex flex-1 p-2'>{children}</main>
+        <main className='flex p-2'>{children}</main>
       </body>
     </html>
   );
