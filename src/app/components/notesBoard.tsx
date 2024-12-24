@@ -3,14 +3,13 @@
 import {
   DragEndEvent,
   DragOverEvent,
-  DragOverlay,
   DragStartEvent,
   PointerSensor,
 } from '@dnd-kit/core';
 import { DndContext, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext } from '@dnd-kit/sortable';
+import dynamic from 'next/dynamic';
 import { useMemo, useOptimistic, useState, useTransition } from 'react';
-import { createPortal } from 'react-dom';
 
 import {
   moveNoteToEmptyColumn,
@@ -19,11 +18,11 @@ import {
   updateNotePositionOutsideColumn,
 } from '@/app/actions/notesActions';
 import NotesColumn from '@/app/components/notesColumn';
-import NotesColumnSkeleton from '@/app/components/notesColumnSkeleton';
 import type { UserColumn, UserNote } from '@/app/types/note';
 
 import AddColumnButton from './addColumnButton';
-import NoteSkeleton from './noteSkeleton';
+
+const Portal = dynamic(() => import('./portal'), { ssr: false });
 
 export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
   const [optimisticColumns, setOptimisticColumns] = useOptimistic(columns);
@@ -305,16 +304,7 @@ export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
             />
           ))}
         </SortableContext>
-
-        {createPortal(
-          <DragOverlay>
-            {draggedColumn && (
-              <NotesColumnSkeleton draggedColumn={draggedColumn} />
-            )}
-            {draggedNote && <NoteSkeleton draggedNote={draggedNote} />}
-          </DragOverlay>,
-          document.body,
-        )}
+        <Portal draggedColumn={draggedColumn} draggedNote={draggedNote} />
       </DndContext>
 
       <AddColumnButton

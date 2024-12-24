@@ -1,3 +1,5 @@
+
+
 import {
   getSortedColumns,
   testDatabaseConnection,
@@ -10,6 +12,7 @@ export default async function Home() {
   if (!isMongoDBAlive) {
     return <div>Database is not connected</div>;
   }
+
 
   const columns: UserColumn[] = await getSortedColumns();
   console.log(columns);

@@ -1,5 +1,7 @@
+import { UserColumn } from "../types/note";
+
 type Props = {
-  draggedColumn: string;
+  draggedColumn: UserColumn | null;
 };
 
 export default function NotesColumnSkeleton({ draggedColumn }: Props) {
