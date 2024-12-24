@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { BsPlus } from 'react-icons/bs';
 
-import { handleAddColumn } from '../lib/hooks';
+import { handleAddColumn } from '../lib/handlers';
 import { UserColumn } from '../types/note';
 import { Button } from './ui/button';
 import CloseButton from './ui/closeButton';

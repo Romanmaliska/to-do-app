@@ -1,6 +1,6 @@
 import { FocusEvent, MouseEvent, useTransition } from 'react';
 
-import { deleteNote,updateNote } from '../actions/notesActions';
+import { deleteNote, updateNote } from '../actions/notesActions';
 import { UserColumn, UserNote } from '../types/note';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -64,7 +64,6 @@ export default function UpdateNoteButton({
         ...col,
         notes: col.notes.filter((n) => n.noteId !== note.noteId),
       }));
-      console.log({ object: newColumns });
 
       startTransition(async () => {
         setOptimisticColumns(newColumns);

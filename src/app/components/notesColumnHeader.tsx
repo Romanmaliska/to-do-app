@@ -2,7 +2,7 @@ import { FocusEvent, useState, useTransition } from 'react';
 import { FaRegTrashAlt } from 'react-icons/fa';
 
 import { updateColumnTitle } from '../actions/notesActions';
-import { handleDeleteColumn } from '../lib/hooks';
+import { handleDeleteColumn } from '../lib/handlers';
 import { UserColumn } from '../types/note';
 import { Button } from './ui/button';
 import { Input } from './ui/input';

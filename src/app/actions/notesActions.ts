@@ -110,43 +110,16 @@ export async function deleteNote(columnId: string, noteId: string) {
 }
 
 export async function updateNotePositionInsideColumn({
-  activeColumnId,
-  activeNoteIndex,
-  overNoteIndex,
-  activeNoteId,
-  overNoteId,
+  columnId,
+  newNotes,
 }: {
-  activeColumnId: string;
-  activeNoteIndex: number;
-  overNoteIndex: number;
-  activeNoteId: string;
-  overNoteId: string;
+  columnId: string;
+  newNotes: UserNote[];
 }) {
   await mongoDBclient
     .db('notes')
     .collection('notes')
-    .bulkWrite([
-      {
-        updateOne: {
-          filter: {
-            _id: new ObjectId(activeColumnId),
-            'notes.noteId': activeNoteId,
-          },
-          update: { $set: { 'notes.$[note].noteIndex': overNoteIndex } },
-          arrayFilters: [{ 'note.noteId': activeNoteId }],
-        },
-      },
-      {
-        updateOne: {
-          filter: {
-            _id: new ObjectId(activeColumnId),
-            'notes.noteId': overNoteId,
-          },
-          update: { $set: { 'notes.$[note].noteIndex': activeNoteIndex } },
-          arrayFilters: [{ 'note.noteId': overNoteId }],
-        },
-      },
-    ]);
+    .updateOne({ _id: new ObjectId(columnId) }, { $set: { notes: newNotes } });
 
   revalidatePath('/');
 }

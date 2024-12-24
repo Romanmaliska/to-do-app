@@ -31,7 +31,7 @@ export default function Note({
   } = useSortable({
     id: note.noteId,
     disabled: isNoteUpdated,
-    data: { type: 'note', note },
+    data: { type: 'note', note, columnId },
   });
 
   const style = {

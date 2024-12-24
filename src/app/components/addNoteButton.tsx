@@ -1,7 +1,7 @@
 import { FocusEvent,useState, useTransition } from 'react';
 import { BsPlus } from 'react-icons/bs';
 
-import { handleAddNote } from '../lib/hooks';
+import { handleAddNote } from '../lib/handlers';
 import { UserColumn } from '../types/note';
 import { Button } from './ui/button';
 import CloseButton from './ui/closeButton';

@@ -35,8 +35,8 @@ export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
     [columns],
   );
 
-  const [draggedColumn, setDraggedColumn] = useState<string | null>(null);
-  const [draggedNote, setDraggedNote] = useState<string | null>(null);
+  const [draggedColumn, setDraggedColumn] = useState<UserColumn | null>(null);
+  const [draggedNote, setDraggedNote] = useState<UserNote | null>(null);
 
   const handleDragStart = (event: DragStartEvent) => {
     if (event.active.data?.current?.type === 'column') {
@@ -50,42 +50,77 @@ export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
-    handleColumnDragEnd(event);
-    setDraggedNote(null);
-    setDraggedColumn(null);
-  };
-
-  const handleColumnDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-
     if (!over || active.id === over.id) return;
 
-    const activeIndex = columns.findIndex((col) => col.columnId === active.id);
-    const overIndex = columns.findIndex((col) => col.columnId === over.id);
+    const draggedType: string = active.data?.current?.type;
+    const draggedOverType: string = over.data?.current?.type;
 
-    if (activeIndex === -1 || overIndex === -1) return;
+    // dropped column on column
+    if (draggedType === 'column' && draggedOverType === 'column') {
+      const activeIndex = active.data?.current?.column.columnIndex;
+      const overIndex = over.data?.current?.column.columnIndex;
 
-    const newColumns = columns
-      .with(activeIndex, columns[overIndex])
-      .with(overIndex, columns[activeIndex]);
+      const newColumns = columns
+        .with(activeIndex, columns[overIndex])
+        .with(overIndex, columns[activeIndex]);
 
-    startTransition(async () => {
-      setOptimisticColumns(newColumns);
-      await updateColumnsPosition({
-        overIndex: columns[overIndex].columnIndex,
-        activeIndex: columns[activeIndex].columnIndex,
-        overId: over.id,
-        activeId: active.id,
+      startTransition(async () => {
+        setOptimisticColumns(newColumns);
+
+        await updateColumnsPosition({
+          overIndex,
+          activeIndex,
+          overId: over.id,
+          activeId: active.id,
+        });
       });
-    });
+    }
+
+    // dropped note on note in the same column
+    if (draggedType === 'note' && draggedOverType === 'note') {
+      const activeIndex = active.data?.current?.note.noteIndex;
+      const overIndex = over.data?.current?.note.noteIndex;
+      const columnId = active.data?.current?.columnId;
+
+      const newColumns = columns.map((col) => {
+        if (col.columnId === columnId) {
+          return {
+            ...col,
+            notes: col.notes
+              .map((note) => {
+                if (note.noteIndex === activeIndex) {
+                  return { ...note, noteIndex: overIndex };
+                } else if (note.noteIndex === overIndex) {
+                  return { ...note, noteIndex: activeIndex };
+                }
+                return note;
+              })
+              .toSorted((a, b) => a.noteIndex - b.noteIndex),
+          };
+        }
+        return col;
+      });
+
+      startTransition(async () => {
+        setOptimisticColumns(newColumns);
+
+        await updateNotePositionInsideColumn({
+          columnId,
+          newNotes: newColumns.find((col) => col.columnId === columnId)!.notes,
+        });
+      });
+    }
+
+    setDraggedNote(null);
+    setDraggedColumn(null);
   };
 
   const handleNoteDragOver = (event: DragOverEvent) => {
     const { active, over } = event;
     if (!over) return;
 
-    console.log('active', active);
-    console.log('over', over);
+    console.log({ active, over });
 
     const activeId = active.id as string;
     const overId = over.id as string;
@@ -94,10 +129,22 @@ export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
     const isActiveNote = active.data?.current?.type === 'note';
     const isOverNote = over.data?.current?.type === 'note';
     const isOverColumn = over.data?.current?.type === 'column';
+    const isAlreadyNoteInColumn =
+      isOverColumn &&
+      over?.data?.current?.column.notes?.some(
+        (note: UserNote) => note.noteId === activeId,
+      );
 
-    if (!isActiveNote) return;
+    console.log({
+      isActiveNote,
+      isOverNote,
+      isOverColumn,
+      isAlreadyNoteInColumn,
+    });
 
-    // dropped note on note
+    if (!isActiveNote || isAlreadyNoteInColumn) return;
+
+    // dropped note on note in different column
     if (isOverNote) {
       const activeColumnIndex = columns.findIndex((col) =>
         col.notes.find((note) => note.noteId === activeId),
@@ -123,43 +170,6 @@ export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
 
       if (!activeNote) return;
 
-      // dropped note on note in the same column
-      if (activeColumnIndex === overColumnIndex) {
-        const newColumns = columns.map((col) => ({
-          ...col,
-          notes: col.notes.map((note) => ({ ...note })),
-        }));
-        const activeNote = newColumns[activeColumnIndex].notes[activeNoteIndex];
-        const overNote = newColumns[overColumnIndex].notes[overNoteIndex];
-
-        if (!activeNote || !overNote) return;
-
-        [activeNote.noteIndex, overNote.noteIndex] = [
-          overNote.noteIndex,
-          activeNote.noteIndex,
-        ];
-
-        startTransition(async () => {
-          setOptimisticColumns(
-            newColumns.map((col) => ({
-              ...col,
-              notes: col.notes.toSorted((a, b) => a.noteIndex - b.noteIndex),
-            })),
-          );
-
-          await updateNotePositionInsideColumn({
-            activeColumnId: columns[activeColumnIndex].columnId,
-            activeNoteIndex,
-            overNoteIndex,
-            activeNoteId: activeId,
-            overNoteId: overId,
-          });
-        });
-
-        return;
-      }
-
-      // dropped note on note in different columns
       if (activeColumnIndex !== overColumnIndex) {
         // add note to new column and increase noteIndexes
         const newColumns = columns.map((col, index) => {
@@ -295,6 +305,7 @@ export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
             />
           ))}
         </SortableContext>
+
         {createPortal(
           <DragOverlay>
             {draggedColumn && (
