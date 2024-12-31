@@ -14,7 +14,7 @@ export async function handleAddColumn(
 ) {
   const newColumn = {
     columnTitle,
-    columnIndex: columns.length ,
+    columnIndex: columns.length,
     columnId: generateId(),
     notes: [],
   };

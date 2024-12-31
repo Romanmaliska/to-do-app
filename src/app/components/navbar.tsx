@@ -1,3 +1,4 @@
+import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/nextjs';
 import Link from 'next/link';
 
 import { Button } from './ui/button';
@@ -9,9 +10,15 @@ export default function Navbar() {
         <h1 className='font-extrabold'>Another Todo App</h1>
       </Link>
       <div className='flex gap-4'>
-        <Link href='/sign-in'>
-          <Button>Sign in</Button>
-        </Link>
+        <SignedIn>
+          <UserButton />
+          <Link href='/board'>
+            <Button>board</Button>
+          </Link>
+        </SignedIn>
+        <SignedOut>
+          <SignInButton />
+        </SignedOut>
       </div>
     </nav>
   );
