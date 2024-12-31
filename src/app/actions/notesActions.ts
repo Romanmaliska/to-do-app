@@ -5,11 +5,7 @@ import { ObjectId } from 'mongodb';
 import { revalidatePath } from 'next/cache';
 
 import mongoDBclient from '@/app/lib/mongodb';
-import type {
-  UserColumn,
-  UserColumnDocument,
-  UserNote,
-} from '@/app/types/note';
+import type { UserColumn, UserDocument, UserNote } from '@/app/types/note';
 
 export async function testDatabaseConnection() {
   let isConnected = false;
@@ -27,19 +23,39 @@ export async function testDatabaseConnection() {
   }
 }
 
-export async function getSortedColumns() {
-  const columnDocument: UserColumnDocument[] = await mongoDBclient
-    .db('notes')
-    .collection<UserColumnDocument>('notes')
-    .find()
-    .toArray();
+export async function createNewUser({ userId }: { userId: string }) {
+  const newUser = {
+    userId,
+    columns: [],
+  };
 
-  const sortedColumns: UserColumn[] = columnDocument
-    .map(({ _id, notes, ...data }) => {
+  try {
+    const collection = mongoDBclient.db('users').collection('users');
+    const existingUser = await collection.findOne({ userId });
+
+    if (!existingUser) {
+      await collection.insertOne(newUser);
+    }
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+export async function getSortedColumns({ userId }: { userId: string }) {
+  const columnDocument: UserDocument | null = await mongoDBclient
+    .db('users')
+    .collection<UserDocument>('users')
+    .findOne({ userId });
+
+  if (!columnDocument?.columns?.length) return null;
+
+  const sortedColumns: UserColumn[] = columnDocument.columns
+    .map(({ notes, ...data }) => {
       return {
         ...data,
-        notes: notes.toSorted((a, b) => a.noteIndex - b.noteIndex),
-        columnId: _id.toString(),
+        notes: notes?.length
+          ? notes.toSorted((a, b) => a.noteIndex - b.noteIndex)
+          : [],
       };
     })
     .toSorted((a, b) => a.columnIndex - b.columnIndex);
@@ -47,19 +63,26 @@ export async function getSortedColumns() {
   return sortedColumns;
 }
 
-export async function addNewColumn(newColumn: UserColumn) {
-  await mongoDBclient.db('notes').collection('notes').insertOne(newColumn);
+export async function addNewColumn(newColumn: UserColumn, userId: string) {
+  await mongoDBclient
+    .db('users')
+    .collection<Document>('users')
+    .updateOne({ userId }, { $push: { columns: newColumn } });
 
   revalidatePath('/');
 }
 
-export async function deleteColumn(_id: string) {
-  await mongoDBclient
-    .db('notes')
-    .collection('notes')
-    .deleteOne({ _id: new ObjectId(_id) });
+export async function deleteColumn(userId: string, newColumns: UserColumn[]) {
+  try {
+    await mongoDBclient
+      .db('users')
+      .collection<Document>('users')
+      .updateOne({ userId }, { $set: { columns: newColumns } });
 
-  revalidatePath('/');
+    revalidatePath('/');
+  } catch (error) {
+    console.error('Failed to delete column:', error);
+  }
 }
 
 export async function updateColumnsPosition({

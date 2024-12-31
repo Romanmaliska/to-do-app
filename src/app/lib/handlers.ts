@@ -7,21 +7,28 @@ import {
 import { UserColumn } from '../types/note';
 import { generateId } from './utils';
 
-export async function handleAddColumn(
-  setOptimisticColumns: (columns: UserColumn[]) => void,
-  columns: UserColumn[],
-  columnTitle: string,
-) {
+export async function handleAddColumn({
+  setOptimisticColumns,
+  columns,
+  columnTitle,
+  userId,
+}: {
+  setOptimisticColumns: (columns: UserColumn[] | null) => void;
+  columns: UserColumn[] | null;
+  columnTitle: string;
+  userId: string;
+}) {
   const newColumn = {
     columnTitle,
-    columnIndex: columns.length,
+    columnIndex: columns?.length || 0,
     columnId: generateId(),
     notes: [],
   };
 
+  setOptimisticColumns([...(columns || []), newColumn]);
+
   try {
-    setOptimisticColumns([...columns, newColumn]);
-    await addNewColumn(newColumn);
+    await addNewColumn(newColumn, userId);
   } catch {
     setOptimisticColumns(columns);
   }
@@ -31,11 +38,13 @@ export async function handleDeleteColumn(
   setOptimisticColumns: (columns: UserColumn[]) => void,
   columnId: string,
   columns: UserColumn[],
+  userId: string,
 ) {
   const newColumns = columns.filter((column) => column.columnId !== columnId);
+  setOptimisticColumns(newColumns);
+
   try {
-    setOptimisticColumns(newColumns);
-    await deleteColumn(columnId);
+    await deleteColumn(userId, newColumns);
   } catch {
     setOptimisticColumns(columns);
   }

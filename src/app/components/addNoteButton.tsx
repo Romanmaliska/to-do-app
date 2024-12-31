@@ -1,4 +1,4 @@
-import { FocusEvent,useState, useTransition } from 'react';
+import { FocusEvent, useState, useTransition } from 'react';
 import { BsPlus } from 'react-icons/bs';
 
 import { handleAddNote } from '../lib/handlers';

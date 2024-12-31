@@ -8,12 +8,14 @@ import CloseButton from './ui/closeButton';
 import { Input } from './ui/input';
 
 type Props = {
-  columns: UserColumn[];
-  setOptimisticColumns: (columns: UserColumn[]) => void;
+  columns: UserColumn[] | null;
+  userId: string;
+  setOptimisticColumns: (columns: UserColumn[] | null) => void;
 };
 
 export default function AddColumnButton({
   columns,
+  userId,
   setOptimisticColumns,
 }: Props) {
   const [isAddColumnClicked, setIsAddColumnClicked] = useState(false);
@@ -22,7 +24,12 @@ export default function AddColumnButton({
     setIsAddColumnClicked(false);
 
     const columnTitle = formData.get('columnTitle') as string;
-    await handleAddColumn(setOptimisticColumns, columns, columnTitle);
+    await handleAddColumn({
+      setOptimisticColumns,
+      columns,
+      columnTitle,
+      userId,
+    });
   };
 
   return (

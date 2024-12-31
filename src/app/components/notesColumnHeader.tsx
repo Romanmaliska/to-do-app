@@ -11,12 +11,14 @@ type Props = {
   setOptimisticColumns: (columns: UserColumn[]) => void;
   columns: UserColumn[];
   column: UserColumn;
+  userId: string;
 };
 
 export default function NotesColumnHeader({
   setOptimisticColumns,
   columns,
   column,
+  userId,
 }: Props) {
   const [_, startTransition] = useTransition();
   const [isColumnTitleUpdated, setIsColumnTitleUpdated] = useState(false);
@@ -76,6 +78,7 @@ export default function NotesColumnHeader({
           setOptimisticColumns,
           column.columnId,
           columns,
+          userId,
         )}
       >
         <Button className='hover:bg-darkGrey' variant='ghost'>

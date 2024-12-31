@@ -24,13 +24,18 @@ import AddColumnButton from './addColumnButton';
 
 const Portal = dynamic(() => import('./portal'), { ssr: false });
 
-export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
+type Props = {
+  columns: UserColumn[] | null;
+  userId: string;
+};
+
+export default function NotesBoard({ columns, userId }: Props) {
   const [optimisticColumns, setOptimisticColumns] = useOptimistic(columns);
 
   const [_, startTransition] = useTransition();
 
   const columnsIds = useMemo(
-    () => columns.map((col) => col.columnId),
+    () => (columns ? columns.map((col) => col.columnId) : []),
     [columns],
   );
 
@@ -50,7 +55,7 @@ export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    if (!over || active.id === over.id) return;
+    if (!over || active.id === over.id || !columns) return;
 
     const draggedType: string = active.data?.current?.type;
     const draggedOverType: string = over.data?.current?.type;
@@ -117,9 +122,7 @@ export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
 
   const handleNoteDragOver = (event: DragOverEvent) => {
     const { active, over } = event;
-    if (!over) return;
-
-    console.log({ active, over });
+    if (!over || !columns) return;
 
     const activeId = active.id as string;
     const overId = over.id as string;
@@ -294,22 +297,25 @@ export default function NotesBoard({ columns }: { columns: UserColumn[] }) {
         sensors={sensors}
       >
         <SortableContext items={columnsIds}>
-          {optimisticColumns.map((column) => (
-            <NotesColumn
-              columns={columns}
-              key={column.columnId}
-              column={column}
-              notes={column.notes}
-              setOptimisticColumns={setOptimisticColumns}
-            />
-          ))}
+          {optimisticColumns &&
+            optimisticColumns.map((column) => (
+              <NotesColumn
+                key={column.columnId}
+                columns={optimisticColumns}
+                column={column}
+                notes={column.notes}
+                userId={userId}
+                setOptimisticColumns={setOptimisticColumns}
+              />
+            ))}
         </SortableContext>
         <Portal draggedColumn={draggedColumn} draggedNote={draggedNote} />
       </DndContext>
 
       <AddColumnButton
         setOptimisticColumns={setOptimisticColumns}
-        columns={columns}
+        columns={optimisticColumns}
+        userId={userId}
       />
     </div>
   );

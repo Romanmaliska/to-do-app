@@ -12,6 +12,7 @@ type Props = {
   columns: UserColumn[];
   column: UserColumn;
   notes: UserNote[];
+  userId: string;
   setOptimisticColumns: (columns: UserColumn[]) => void;
 };
 
@@ -19,6 +20,7 @@ export default function NotesColumn({
   columns,
   column,
   notes,
+  userId,
   setOptimisticColumns,
 }: Props) {
   const notesIds = useMemo(
@@ -60,33 +62,37 @@ export default function NotesColumn({
       style={style}
       ref={setNodeRef}
     >
-      <div {...attributes} {...listeners}>
-        <NotesColumnHeader
-          setOptimisticColumns={setOptimisticColumns}
-          columns={columns}
-          column={column}
-        />
-      </div>
-
-      <SortableContext items={notesIds}>
-        {notes.map((note: UserNote) => {
-          return (
-            <Note
-              key={note.noteId}
-              columns={columns}
-              note={note}
-              columnId={column.columnId}
+      {columns && (
+        <>
+          <div {...attributes} {...listeners}>
+            <NotesColumnHeader
               setOptimisticColumns={setOptimisticColumns}
+              columns={columns}
+              column={column}
+              userId={userId}
             />
-          );
-        })}
-      </SortableContext>
+          </div>
+          <SortableContext items={notesIds}>
+            {notes.map((note: UserNote) => {
+              return (
+                <Note
+                  key={note.noteId}
+                  columns={columns}
+                  note={note}
+                  columnId={column.columnId}
+                  setOptimisticColumns={setOptimisticColumns}
+                />
+              );
+            })}
+          </SortableContext>
 
-      <AddNoteButton
-        setOptimisticColumns={setOptimisticColumns}
-        columns={columns}
-        columnId={column.columnId}
-      />
+          <AddNoteButton
+            setOptimisticColumns={setOptimisticColumns}
+            columns={columns}
+            columnId={column.columnId}
+          />
+        </>
+      )}
     </div>
   );
 }
