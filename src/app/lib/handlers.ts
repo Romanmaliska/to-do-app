@@ -2,7 +2,6 @@ import {
   addNewColumn,
   addNewNote,
   deleteColumn,
-  deleteNote,
 } from '../actions/notesActions';
 import { UserColumn } from '../types/note';
 import { generateId } from './utils';
@@ -54,12 +53,19 @@ export async function handleDeleteColumn(
   }
 }
 
-export async function handleAddNote(
-  setOptimisticColumns: (columns: UserColumn[]) => void,
-  columns: UserColumn[],
-  columnId: string,
-  noteText: string,
-) {
+export async function handleAddNote({
+  setOptimisticColumns,
+  columns,
+  columnId,
+  noteText,
+  userId,
+}: {
+  setOptimisticColumns: (columns: UserColumn[]) => void;
+  columns: UserColumn[];
+  columnId: string;
+  noteText: string;
+  userId: string;
+}) {
   const newNote = {
     noteText,
     noteId: generateId(),
@@ -75,26 +81,8 @@ export async function handleAddNote(
 
   try {
     setOptimisticColumns(newColumns);
-    await addNewNote(columnId, newNote);
+    await addNewNote(userId, newColumns);
   } catch {
     setOptimisticColumns(columns);
   }
-}
-
-export async function handleDeleteNote(
-  setOptimisticColumns: (columns: UserColumn[]) => void,
-  columnId: string,
-  columns: UserColumn[],
-  noteId: string,
-) {
-  const newColumns = columns.map((col) => {
-    if (col.columnId !== columnId) return col;
-
-    const newNotes = col.notes.filter((note) => note.noteId !== noteId);
-
-    return { ...col, notes: newNotes };
-  });
-
-  setOptimisticColumns(newColumns);
-  deleteNote(columnId, noteId);
 }

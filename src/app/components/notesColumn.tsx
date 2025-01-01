@@ -80,6 +80,7 @@ export default function NotesColumn({
                   columns={columns}
                   note={note}
                   columnId={column.columnId}
+                  userId={userId}
                   setOptimisticColumns={setOptimisticColumns}
                 />
               );
@@ -90,6 +91,7 @@ export default function NotesColumn({
             setOptimisticColumns={setOptimisticColumns}
             columns={columns}
             columnId={column.columnId}
+            userId={userId}
           />
         </>
       )}

@@ -9,7 +9,7 @@ import {
 import { DndContext, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext } from '@dnd-kit/sortable';
 import dynamic from 'next/dynamic';
-import { useMemo, useOptimistic, useState, useTransition } from 'react';
+import { use, useMemo, useOptimistic, useState, useTransition } from 'react';
 
 import {
   moveNoteToEmptyColumn,
@@ -65,19 +65,19 @@ export default function NotesBoard({ columns, userId }: Props) {
       const activeIndex = active.data?.current?.column.columnIndex;
       const overIndex = over.data?.current?.column.columnIndex;
 
-      const newColumns = columns
-        .with(activeIndex, columns[overIndex])
-        .with(overIndex, columns[activeIndex]);
+      const newColumns = columns.map((col) => {
+        if (col.columnIndex === activeIndex) {
+          return { ...col, columnIndex: overIndex };
+        }
+        if (col.columnIndex === overIndex) {
+          return { ...col, columnIndex: activeIndex };
+        }
+        return col;
+      });
 
       startTransition(async () => {
         setOptimisticColumns(newColumns);
-
-        await updateColumnsPosition({
-          overIndex,
-          activeIndex,
-          overId: over.id,
-          activeId: active.id,
-        });
+        await updateColumnsPosition(userId, newColumns);
       });
     }
 
@@ -108,11 +108,7 @@ export default function NotesBoard({ columns, userId }: Props) {
 
       startTransition(async () => {
         setOptimisticColumns(newColumns);
-
-        await updateNotePositionInsideColumn({
-          columnId,
-          newNotes: newColumns.find((col) => col.columnId === columnId)!.notes,
-        });
+        await updateNotePositionInsideColumn(userId, newColumns);
       });
     }
 
@@ -205,15 +201,7 @@ export default function NotesBoard({ columns, userId }: Props) {
               notes: col.notes.toSorted((a, b) => a.noteIndex - b.noteIndex),
             })),
           );
-
-          await updateNotePositionOutsideColumn({
-            activeColumnId: columns[activeColumnIndex].columnId,
-            overColumnId: columns[overColumnIndex].columnId,
-            activeNoteIndex,
-            overNoteIndex,
-            activeNoteId: activeId,
-            activeNoteText: activeNote.noteText,
-          });
+          await updateNotePositionOutsideColumn(userId, newColumns);
         });
 
         return;
@@ -264,13 +252,7 @@ export default function NotesBoard({ columns, userId }: Props) {
           })),
         );
 
-        await moveNoteToEmptyColumn({
-          activeColumnId: columns[activeColumnIndex].columnId,
-          activeNoteIndex,
-          activeNoteText: activeNote.noteText,
-          activeNoteId: activeId,
-          overColumnId: overId,
-        });
+        await moveNoteToEmptyColumn(userId, newColumns);
       });
     }
   };

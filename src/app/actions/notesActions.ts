@@ -11,6 +11,7 @@ import type {
   UserDocument,
   UserNote,
 } from '@/app/types/note';
+import { TestContext } from 'node:test';
 
 export async function testDatabaseConnection() {
   let isConnected = false;
@@ -86,278 +87,15 @@ export async function deleteColumn(userId: string, newColumns: UserColumn[]) {
 
     revalidatePath('/board');
   } catch (error) {
-    console.error('Failed to delete column:', error);
+    console.error(error);
   }
-}
-
-export async function updateColumnsPosition({
-  overIndex,
-  activeIndex,
-  overId,
-  activeId,
-}: {
-  overIndex: number;
-  activeIndex: number;
-  overId: UniqueIdentifier;
-  activeId: UniqueIdentifier;
-}) {
-  const colection = mongoDBclient.db('notes').collection('notes');
-
-  await colection.updateOne(
-    { _id: new ObjectId(overId) },
-    { $set: { columnIndex: activeIndex } },
-  );
-
-  await colection.updateOne(
-    { _id: new ObjectId(activeId) },
-    { $set: { columnIndex: overIndex } },
-  );
-
-  revalidatePath('/board');
-}
-
-export async function addNewNote(columnId: string, newNote: UserNote) {
-  await mongoDBclient
-    .db('notes')
-    .collection('notes')
-    .updateOne({ _id: new ObjectId(columnId) }, { $push: { notes: newNote } });
-
-  revalidatePath('/board');
-}
-
-export async function deleteNote(columnId: string, noteId: string) {
-  await mongoDBclient
-    .db('notes')
-    .collection('notes')
-    .updateOne(
-      { _id: new ObjectId(columnId) },
-      { $pull: { notes: { noteId } } },
-    );
-
-  revalidatePath('/board');
-}
-
-export async function updateNotePositionInsideColumn({
-  columnId,
-  newNotes,
-}: {
-  columnId: string;
-  newNotes: UserNote[];
-}) {
-  await mongoDBclient
-    .db('notes')
-    .collection('notes')
-    .updateOne({ _id: new ObjectId(columnId) }, { $set: { notes: newNotes } });
-
-  revalidatePath('/board');
-}
-
-export async function updateNotePositionOutsideColumn({
-  activeColumnId,
-  overColumnId,
-  activeNoteIndex,
-  overNoteIndex,
-  activeNoteId,
-  activeNoteText,
-}: {
-  activeColumnId: string;
-  activeNoteIndex: number;
-  overColumnId: string;
-  overNoteIndex: number;
-  activeNoteId: string;
-  activeNoteText: string;
-}) {
-  const collection = mongoDBclient.db('notes').collection('notes');
-
-  // Remove the note from the active column
-  // Update active column indexes
-  await collection.updateOne({ _id: new ObjectId(activeColumnId) }, [
-    {
-      $set: {
-        notes: {
-          $filter: {
-            input: '$notes',
-            as: 'note',
-            cond: { $ne: ['$$note.noteId', activeNoteId] }, // Exclude the note to be removed
-          },
-        },
-      },
-    },
-    {
-      $set: {
-        notes: {
-          $map: {
-            input: '$notes',
-            as: 'note',
-            in: {
-              $mergeObjects: [
-                '$$note',
-                {
-                  noteIndex: {
-                    $cond: [
-                      { $lt: ['$$note.noteIndex', activeNoteIndex] },
-                      '$$note.noteIndex',
-                      { $subtract: ['$$note.noteIndex', 1] },
-                    ],
-                  },
-                },
-              ],
-            },
-          },
-        },
-      },
-    },
-  ]);
-
-  // Update over column indexes
-  // Add the note to the over column
-  await collection.updateOne({ _id: new ObjectId(overColumnId) }, [
-    {
-      $set: {
-        notes: {
-          $concatArrays: [
-            {
-              $map: {
-                input: '$notes',
-                as: 'note',
-                in: {
-                  $mergeObjects: [
-                    '$$note',
-                    {
-                      noteIndex: {
-                        $cond: [
-                          { $lt: ['$$note.noteIndex', overNoteIndex] },
-                          '$$note.noteIndex',
-                          { $add: ['$$note.noteIndex', 1] },
-                        ],
-                      },
-                    },
-                  ],
-                },
-              },
-            },
-            [
-              {
-                noteId: activeNoteId,
-                noteIndex: overNoteIndex,
-                noteText: activeNoteText,
-              },
-            ],
-          ],
-        },
-      },
-    },
-  ]);
-
-  revalidatePath('/board');
-}
-
-export async function moveNoteToEmptyColumn({
-  activeColumnId,
-  overColumnId,
-  activeNoteId,
-  activeNoteIndex,
-  activeNoteText,
-}: {
-  activeColumnId: string;
-  overColumnId: string;
-  activeNoteId: string;
-  activeNoteIndex: number;
-  activeNoteText: string;
-}) {
-  const collection = mongoDBclient.db('notes').collection('notes');
-
-  await collection.bulkWrite([
-    // Decrement `noteIndex` for notes in the active column and remove the note
-    {
-      updateOne: {
-        filter: { _id: new ObjectId(activeColumnId) },
-        update: [
-          {
-            $set: {
-              notes: {
-                $filter: {
-                  input: {
-                    $map: {
-                      input: '$notes',
-                      as: 'note', // Define the variable as "note"
-                      in: {
-                        $mergeObjects: [
-                          '$$note',
-                          {
-                            noteIndex: {
-                              $cond: [
-                                {
-                                  $and: [
-                                    {
-                                      $gt: [
-                                        '$$note.noteIndex',
-                                        activeNoteIndex,
-                                      ],
-                                    },
-                                    { $ne: ['$$note.noteId', activeNoteId] },
-                                  ],
-                                },
-                                { $subtract: ['$$note.noteIndex', 1] },
-                                '$$note.noteIndex',
-                              ],
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  },
-                  as: 'note', // Define the variable for $filter
-                  cond: { $ne: ['$$note.noteId', activeNoteId] }, // Exclude the note with activeNoteId
-                },
-              },
-            },
-          },
-        ],
-      },
-    },
-    // Add the note to the target column
-    {
-      updateOne: {
-        filter: { _id: new ObjectId(overColumnId) },
-        update: {
-          $push: {
-            notes: {
-              noteId: activeNoteId,
-              noteIndex: 0,
-              noteText: activeNoteText,
-            },
-          },
-        },
-      },
-    },
-  ]);
-
-  revalidatePath('/board');
-}
-
-export async function updateNote(
-  columnId: string,
-  noteId: string,
-  noteText: string,
-) {
-  await mongoDBclient
-    .db('notes')
-    .collection('notes')
-    .updateOne(
-      { _id: new ObjectId(columnId), 'notes.noteId': noteId },
-      { $set: { 'notes.$[note].noteText': noteText } },
-      { arrayFilters: [{ 'note.noteId': noteId }] },
-    );
-
-  revalidatePath('/board');
 }
 
 export async function updateColumnTitle({
   userId,
   newColumns,
 }: {
-  userId: Pick<User, 'userId'>;
+  userId: string;
   newColumns: UserColumn[];
 }) {
   try {
@@ -369,5 +107,108 @@ export async function updateColumnTitle({
     revalidatePath('/board');
   } catch (error) {
     console.error(error);
+  }
+}
+
+export async function updateColumnsPosition(
+  userId: string,
+  newColumns: UserColumn[],
+) {
+  try {
+    await mongoDBclient
+      .db('users')
+      .collection<Document>('users')
+      .updateOne({ userId }, { $set: { columns: newColumns } });
+
+    revalidatePath('/board');
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+export async function addNewNote(userId: string, newColumns: UserColumn[]) {
+  try {
+    await mongoDBclient
+      .db('users')
+      .collection<Document>('users')
+      .updateOne({ userId }, { $set: { columns: newColumns } });
+
+    revalidatePath('/board');
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+export async function deleteNote(userId: string, newColumns: UserColumn[]) {
+  try {
+    await mongoDBclient
+      .db('users')
+      .collection<Document>('users')
+      .updateOne({ userId }, { $set: { columns: newColumns } });
+
+    revalidatePath('/board');
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+export async function updateNotePositionInsideColumn(
+  userId: string,
+  newColumns: UserColumn[],
+) {
+  try {
+    await mongoDBclient
+      .db('users')
+      .collection<Document>('users')
+      .updateOne({ userId }, { $set: { columns: newColumns } });
+
+    revalidatePath('/board');
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+export async function updateNotePositionOutsideColumn(
+  userId: string,
+  newColumns: UserColumn[],
+) {
+  try {
+    await mongoDBclient
+      .db('users')
+      .collection<Document>('users')
+      .updateOne({ userId }, { $set: { columns: newColumns } });
+
+    revalidatePath('/board');
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+export async function moveNoteToEmptyColumn(
+  userId: string,
+  newColumns: UserColumn[],
+) {
+  try {
+    await mongoDBclient
+      .db('users')
+      .collection('users')
+      .updateOne({ userId }, { $set: { columns: newColumns } });
+
+    revalidatePath('/board');
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+export async function updateNote(userId: string, newColumns: UserColumn[]) {
+  try {
+    await mongoDBclient
+      .db('users')
+      .collection('users')
+      .updateOne({ userId }, { $set: { columns: newColumns } });
+
+    revalidatePath('/board');
+  } catch (e) {
+    console.log(e);
   }
 }

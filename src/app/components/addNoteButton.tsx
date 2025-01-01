@@ -11,12 +11,14 @@ type Props = {
   columns: UserColumn[];
   columnId: string;
   setOptimisticColumns: (columns: UserColumn[]) => void;
+  userId: string;
 };
 
 export default function AddNoteButton({
   setOptimisticColumns,
   columns,
   columnId,
+  userId,
 }: Props) {
   const [_, startTransition] = useTransition();
   const [isAddNoteClicked, setIsAddNoteClicked] = useState(false);
@@ -26,7 +28,13 @@ export default function AddNoteButton({
 
     if (!noteText) return;
 
-    await handleAddNote(setOptimisticColumns, columns, columnId, noteText);
+    await handleAddNote({
+      setOptimisticColumns,
+      columns,
+      columnId,
+      noteText,
+      userId,
+    });
   };
 
   const handleBlur = (event: FocusEvent<HTMLInputElement>) => {

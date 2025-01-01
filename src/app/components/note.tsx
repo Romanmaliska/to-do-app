@@ -12,11 +12,13 @@ export default function Note({
   note,
   columns,
   columnId,
+  userId,
   setOptimisticColumns,
 }: {
   note: UserNote;
   columns: UserColumn[];
   columnId: string;
+  userId: string;
   setOptimisticColumns: (columns: UserColumn[]) => void;
 }) {
   const [isNoteUpdated, setIsNoteUpdated] = useState(false);
@@ -64,6 +66,7 @@ export default function Note({
           columns={columns}
           columnId={columnId}
           note={note}
+          userId={userId}
         />
       ) : (
         <p onClick={() => setIsNoteUpdated(!isNoteUpdated)}>{note.noteText}</p>

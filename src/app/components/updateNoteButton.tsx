@@ -1,4 +1,4 @@
-import { FocusEvent, MouseEvent, useTransition } from 'react';
+import { FocusEvent, useTransition } from 'react';
 
 import { deleteNote, updateNote } from '../actions/notesActions';
 import { UserColumn, UserNote } from '../types/note';
@@ -9,6 +9,7 @@ type Props = {
   columns: UserColumn[];
   columnId: string;
   note: UserNote;
+  userId: string;
   setOptimisticColumns: (columns: UserColumn[]) => void;
   setIsNoteUpdated: (isAddNoteClicked: boolean) => void;
 };
@@ -19,6 +20,7 @@ export default function UpdateNoteButton({
   columns,
   columnId,
   note,
+  userId,
 }: Props) {
   const [_, startTransition] = useTransition();
 
@@ -43,7 +45,7 @@ export default function UpdateNoteButton({
 
     setOptimisticColumns(newColumns);
 
-    await updateNote(columnId, note.noteId, noteText);
+    await updateNote(userId, newColumns);
   };
 
   const handleBlur = (event: FocusEvent<HTMLInputElement>) => {
@@ -67,7 +69,7 @@ export default function UpdateNoteButton({
 
       startTransition(async () => {
         setOptimisticColumns(newColumns);
-        await deleteNote(columnId, note.noteId);
+        await deleteNote(userId, newColumns);
       });
     }
   };
