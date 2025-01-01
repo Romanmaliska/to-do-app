@@ -1,7 +1,4 @@
-import { after } from 'node:test';
-
 import { auth } from '@clerk/nextjs/server';
-import { currentUser } from '@clerk/nextjs/server';
 
 import {
   createNewUser,

@@ -9,7 +9,7 @@ import {
 import { DndContext, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext } from '@dnd-kit/sortable';
 import dynamic from 'next/dynamic';
-import { use, useMemo, useOptimistic, useState, useTransition } from 'react';
+import { useMemo, useOptimistic, useState, useTransition } from 'react';
 
 import {
   moveNoteToEmptyColumn,
