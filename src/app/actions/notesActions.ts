@@ -24,7 +24,7 @@ export async function testDatabaseConnection() {
 
     return !isConnected;
   } catch (e) {
-    console.error(e);
+    console.log(e);
     return isConnected;
   }
 }
@@ -43,7 +43,7 @@ export async function createNewUser(userId: string) {
       await collection.insertOne(newUser);
     }
   } catch (e) {
-    console.error(e);
+    console.log(e);
   }
 }
 
@@ -86,8 +86,8 @@ export async function deleteColumn(userId: string, newColumns: UserColumn[]) {
       .updateOne({ userId }, { $set: { columns: newColumns } });
 
     revalidatePath('/board');
-  } catch (error) {
-    console.error(error);
+  } catch (e) {
+    console.log(e);
   }
 }
 
@@ -105,8 +105,8 @@ export async function updateColumnTitle({
       .updateOne({ userId }, { $set: { columns: newColumns } });
 
     revalidatePath('/board');
-  } catch (error) {
-    console.error(error);
+  } catch (e) {
+    console.log(e);
   }
 }
 
@@ -121,8 +121,8 @@ export async function updateColumnsPosition(
       .updateOne({ userId }, { $set: { columns: newColumns } });
 
     revalidatePath('/board');
-  } catch (error) {
-    console.error(error);
+  } catch (e) {
+    console.log(e);
   }
 }
 
@@ -134,8 +134,8 @@ export async function addNewNote(userId: string, newColumns: UserColumn[]) {
       .updateOne({ userId }, { $set: { columns: newColumns } });
 
     revalidatePath('/board');
-  } catch (error) {
-    console.error(error);
+  } catch (e) {
+    console.log(e);
   }
 }
 
@@ -147,8 +147,8 @@ export async function deleteNote(userId: string, newColumns: UserColumn[]) {
       .updateOne({ userId }, { $set: { columns: newColumns } });
 
     revalidatePath('/board');
-  } catch (error) {
-    console.error(error);
+  } catch (e) {
+    console.log(e);
   }
 }
 
