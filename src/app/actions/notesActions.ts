@@ -5,14 +5,19 @@ import { ObjectId } from 'mongodb';
 import { revalidatePath } from 'next/cache';
 
 import mongoDBclient from '@/app/lib/mongodb';
-import type { UserColumn, UserDocument, UserNote } from '@/app/types/note';
+import type {
+  User,
+  UserColumn,
+  UserDocument,
+  UserNote,
+} from '@/app/types/note';
 
 export async function testDatabaseConnection() {
   let isConnected = false;
   const mongoClient = await mongoDBclient.connect();
   try {
     // Send a ping to confirm a successful connection
-    await mongoClient.db('admin').command({ ping: 1 });
+    await mongoClient.db('users').command({ ping: 1 });
 
     console.log(' You successfully connected to MongoDB!');
 
@@ -23,7 +28,7 @@ export async function testDatabaseConnection() {
   }
 }
 
-export async function createNewUser({ userId }: { userId: string }) {
+export async function createNewUser(userId: string) {
   const newUser = {
     userId,
     columns: [],
@@ -41,7 +46,7 @@ export async function createNewUser({ userId }: { userId: string }) {
   }
 }
 
-export async function getSortedColumns({ userId }: { userId: string }) {
+export async function getSortedColumns(userId: string) {
   const columnDocument: UserDocument | null = await mongoDBclient
     .db('users')
     .collection<UserDocument>('users')
@@ -63,13 +68,13 @@ export async function getSortedColumns({ userId }: { userId: string }) {
   return sortedColumns;
 }
 
-export async function addNewColumn(newColumn: UserColumn, userId: string) {
+export async function addNewColumn(userId: string, newColumn: UserColumn) {
   await mongoDBclient
     .db('users')
     .collection<Document>('users')
     .updateOne({ userId }, { $push: { columns: newColumn } });
 
-  revalidatePath('/');
+  revalidatePath('/board');
 }
 
 export async function deleteColumn(userId: string, newColumns: UserColumn[]) {
@@ -79,7 +84,7 @@ export async function deleteColumn(userId: string, newColumns: UserColumn[]) {
       .collection<Document>('users')
       .updateOne({ userId }, { $set: { columns: newColumns } });
 
-    revalidatePath('/');
+    revalidatePath('/board');
   } catch (error) {
     console.error('Failed to delete column:', error);
   }
@@ -108,7 +113,7 @@ export async function updateColumnsPosition({
     { $set: { columnIndex: overIndex } },
   );
 
-  revalidatePath('/');
+  revalidatePath('/board');
 }
 
 export async function addNewNote(columnId: string, newNote: UserNote) {
@@ -117,7 +122,7 @@ export async function addNewNote(columnId: string, newNote: UserNote) {
     .collection('notes')
     .updateOne({ _id: new ObjectId(columnId) }, { $push: { notes: newNote } });
 
-  revalidatePath('/');
+  revalidatePath('/board');
 }
 
 export async function deleteNote(columnId: string, noteId: string) {
@@ -129,7 +134,7 @@ export async function deleteNote(columnId: string, noteId: string) {
       { $pull: { notes: { noteId } } },
     );
 
-  revalidatePath('/');
+  revalidatePath('/board');
 }
 
 export async function updateNotePositionInsideColumn({
@@ -144,7 +149,7 @@ export async function updateNotePositionInsideColumn({
     .collection('notes')
     .updateOne({ _id: new ObjectId(columnId) }, { $set: { notes: newNotes } });
 
-  revalidatePath('/');
+  revalidatePath('/board');
 }
 
 export async function updateNotePositionOutsideColumn({
@@ -244,7 +249,7 @@ export async function updateNotePositionOutsideColumn({
     },
   ]);
 
-  revalidatePath('/');
+  revalidatePath('/board');
 }
 
 export async function moveNoteToEmptyColumn({
@@ -328,7 +333,7 @@ export async function moveNoteToEmptyColumn({
     },
   ]);
 
-  revalidatePath('/');
+  revalidatePath('/board');
 }
 
 export async function updateNote(
@@ -345,14 +350,24 @@ export async function updateNote(
       { arrayFilters: [{ 'note.noteId': noteId }] },
     );
 
-  revalidatePath('/');
+  revalidatePath('/board');
 }
 
-export async function updateColumnTitle(columnId: string, columnTitle: string) {
-  await mongoDBclient
-    .db('notes')
-    .collection('notes')
-    .updateOne({ _id: new ObjectId(columnId) }, { $set: { columnTitle } });
+export async function updateColumnTitle({
+  userId,
+  newColumns,
+}: {
+  userId: Pick<User, 'userId'>;
+  newColumns: UserColumn[];
+}) {
+  try {
+    await mongoDBclient
+      .db('users')
+      .collection<Document>('users')
+      .updateOne({ userId }, { $set: { columns: newColumns } });
 
-  revalidatePath('/');
+    revalidatePath('/board');
+  } catch (error) {
+    console.error(error);
+  }
 }

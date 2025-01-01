@@ -137,13 +137,6 @@ export default function NotesBoard({ columns, userId }: Props) {
         (note: UserNote) => note.noteId === activeId,
       );
 
-    console.log({
-      isActiveNote,
-      isOverNote,
-      isOverColumn,
-      isAlreadyNoteInColumn,
-    });
-
     if (!isActiveNote || isAlreadyNoteInColumn) return;
 
     // dropped note on note in different column

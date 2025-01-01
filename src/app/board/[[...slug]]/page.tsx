@@ -21,9 +21,9 @@ export default async function Home() {
 
   if (!userId) return redirectToSignIn();
 
-  await createNewUser({ userId });
+  await createNewUser(userId);
 
-  const columns: UserColumn[] | null = await getSortedColumns({ userId });
+  const columns: UserColumn[] | null = await getSortedColumns(userId);
 
   return <NotesBoard userId={userId} columns={columns} />;
 }
