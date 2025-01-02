@@ -1,4 +1,4 @@
-import { UserNote } from '../types/note';
+import { UserNote } from '../types/user';
 
 type Props = {
   draggeNote: UserNote | null;

@@ -18,7 +18,7 @@ import {
   updateNotePositionOutsideColumn,
 } from '@/app/actions/notesActions';
 import NotesColumn from '@/app/components/notesColumn';
-import type { UserColumn, UserNote } from '@/app/types/note';
+import type { UserColumn, UserNote } from '@/app/types/user';
 
 import AddColumnButton from './addColumnButton';
 

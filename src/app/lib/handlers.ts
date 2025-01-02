@@ -3,7 +3,7 @@ import {
   addNewNote,
   deleteColumn,
 } from '../actions/notesActions';
-import { UserColumn } from '../types/note';
+import { UserColumn } from '../types/user';
 import { generateId } from './utils';
 
 export async function handleAddColumn({

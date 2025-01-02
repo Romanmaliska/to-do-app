@@ -1,4 +1,4 @@
-import { UserColumn } from "../types/note";
+import { UserColumn } from "../types/user";
 
 type Props = {
   draggedColumn: UserColumn | null;

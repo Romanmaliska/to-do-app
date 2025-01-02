@@ -1,7 +1,7 @@
 import { FocusEvent, useTransition } from 'react';
 
 import { deleteNote, updateNote } from '../actions/notesActions';
-import { UserColumn, UserNote } from '../types/note';
+import { UserColumn, UserNote } from '../types/user';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 

@@ -6,7 +6,7 @@ import {
   testDatabaseConnection,
 } from '@/app/actions/notesActions';
 import NotesBoard from '@/app/components/notesBoard';
-import type { UserColumn } from '@/app/types/note';
+import type { UserColumn } from '@/app/types/user';
 
 export default async function Home() {
   const isMongoDBAlive = await testDatabaseConnection();

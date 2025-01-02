@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 
 import mongoDBclient from '@/app/lib/mongodb';
-import type { UserColumn, UserDocument } from '@/app/types/note';
+import type { UserColumn, UserDocument } from '@/app/types/user';
 
 export async function testDatabaseConnection() {
   let isConnected = false;

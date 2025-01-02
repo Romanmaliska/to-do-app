@@ -4,7 +4,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useState } from 'react';
 
-import type { UserColumn, UserNote } from '@/app/types/note';
+import type { UserColumn, UserNote } from '@/app/types/user';
 
 import UpdateNoteButton from './updateNoteButton';
 

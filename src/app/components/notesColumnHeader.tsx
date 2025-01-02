@@ -3,7 +3,7 @@ import { FaRegTrashAlt } from 'react-icons/fa';
 
 import { updateColumnTitle } from '../actions/notesActions';
 import { handleDeleteColumn } from '../lib/handlers';
-import { UserColumn } from '../types/note';
+import { UserColumn } from '../types/user';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 

@@ -1,7 +1,7 @@
 import { DragOverlay } from '@dnd-kit/core';
 import { createPortal } from 'react-dom';
 
-import { UserColumn, UserNote } from '../types/note';
+import { UserColumn, UserNote } from '../types/user';
 import NotesColumnSkeleton from './notesColumnSkeleton';
 import NoteSkeleton from './noteSkeleton';
 

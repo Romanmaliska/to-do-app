@@ -2,7 +2,7 @@ import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useMemo } from 'react';
 
-import { UserColumn, UserNote } from '@/app/types/note';
+import { UserColumn, UserNote } from '@/app/types/user';
 
 import AddNoteButton from './addNoteButton';
 import Note from './note';
