@@ -2,12 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
-body,
-html {
-  background-color: #0079bf;
-  color: #223556;
+* {
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+  background-color: #0079bf;
+  background: linear-gradient(to right, #005c91, #3394cc);
+  color: #223556;
 }
 
 @layer base {
