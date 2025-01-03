@@ -217,13 +217,17 @@ export async function updateNote(
 
 export async function updateNotePositionInsideColumn(
   userId: string,
+  boardId: string,
   newColumns: UserColumn[],
 ) {
   try {
     await mongoDBclient
       .db('users')
       .collection<Document>('users')
-      .updateOne({ userId }, { $set: { columns: newColumns } });
+      .updateOne(
+        { userId, 'boards.boardId': boardId },
+        { $set: { 'boards.$.columns': newColumns } },
+      );
 
     revalidatePath('/board');
   } catch (e) {

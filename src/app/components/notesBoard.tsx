@@ -85,32 +85,30 @@ export default function NotesBoard({ columns, userId }: Props) {
 
     // dropped note on note in the same column
     if (draggedType === 'note' && draggedOverType === 'note') {
-      const activeIndex = active.data?.current?.note.noteIndex;
-      const overIndex = over.data?.current?.note.noteIndex;
+      const activeNote = active.data?.current?.note;
+      const overNote = over.data?.current?.note;
       const columnId = active.data?.current?.columnId;
+
+      if (activeNote.noteId === overNote.noteId || !columnId) return;
 
       const newColumns = columns.map((col) => {
         if (col.columnId === columnId) {
           return {
             ...col,
-            notes: col.notes
-              .map((note) => {
-                if (note.noteIndex === activeIndex) {
-                  return { ...note, noteIndex: overIndex };
-                } else if (note.noteIndex === overIndex) {
-                  return { ...note, noteIndex: activeIndex };
-                }
-                return note;
-              })
-              .toSorted((a, b) => a.noteIndex - b.noteIndex),
+            notes: col.notes.map((note) => {
+              if (note.noteId === activeNote.noteId) return overNote;
+              if (note.noteId === overNote.noteId) return activeNote;
+              return note;
+            }),
           };
         }
+
         return col;
       });
 
       startTransition(async () => {
         setOptimisticColumns(newColumns);
-        await updateNotePositionInsideColumn(userId, newColumns);
+        await updateNotePositionInsideColumn(userId, boardId, newColumns);
       });
     }
 
@@ -135,7 +133,10 @@ export default function NotesBoard({ columns, userId }: Props) {
         (note: UserNote) => note.noteId === activeId,
       );
 
+    console.log(isAlreadyNoteInColumn, 'is already note in column');
     if (!isActiveNote || isAlreadyNoteInColumn) return;
+
+    console.log('should not be here');
 
     // dropped note on note in different column
     if (isOverNote) {
