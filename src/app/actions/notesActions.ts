@@ -3,7 +3,8 @@
 import { revalidatePath } from 'next/cache';
 
 import mongoDBclient from '@/app/lib/mongodb';
-import type { UserColumn, UserDocument } from '@/app/types/user';
+import { generateId } from '@/app/lib/utils';
+import type { UserBoard, UserColumn } from '@/app/types/user';
 
 export async function testDatabaseConnection() {
   let isConnected = false;
@@ -22,60 +23,87 @@ export async function testDatabaseConnection() {
 }
 
 export async function createNewUser(userId: string) {
-  const newUser = {
-    userId,
-    columns: [],
-  };
-
   try {
     const collection = mongoDBclient.db('users').collection('users');
+
     const existingUser = await collection.findOne({ userId });
 
     if (!existingUser) {
-      await collection.insertOne(newUser);
+      await collection.insertOne({ userId });
     }
   } catch (e) {
     console.log(e);
   }
 }
 
-export async function getSortedColumns(userId: string) {
-  const columnDocument: UserDocument | null = await mongoDBclient
-    .db('users')
-    .collection<UserDocument>('users')
-    .findOne({ userId });
+export async function createNewBoard(userId: string, formData: FormData) {
+  const boardName = formData.get('boardName') as string;
 
-  if (!columnDocument?.columns?.length) return null;
+  const newBoard: UserBoard = {
+    boardId: generateId(),
+    boardName,
+  };
 
-  const sortedColumns: UserColumn[] = columnDocument.columns
-    .map(({ notes, ...data }) => {
-      return {
-        ...data,
-        notes: notes?.length
-          ? notes.toSorted((a, b) => a.noteIndex - b.noteIndex)
-          : [],
-      };
-    })
-    .toSorted((a, b) => a.columnIndex - b.columnIndex);
-
-  return sortedColumns;
-}
-
-export async function addNewColumn(userId: string, newColumn: UserColumn) {
-  await mongoDBclient
-    .db('users')
-    .collection<Document>('users')
-    .updateOne({ userId }, { $push: { columns: newColumn } });
-
-  revalidatePath('/board');
-}
-
-export async function deleteColumn(userId: string, newColumns: UserColumn[]) {
   try {
     await mongoDBclient
       .db('users')
       .collection<Document>('users')
-      .updateOne({ userId }, { $set: { columns: newColumns } });
+      .updateOne({ userId }, { $push: { boards: newBoard } });
+
+    revalidatePath('/boards');
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+export async function getBoards(userId: string) {
+  try {
+    const userBoards = await mongoDBclient
+      .db('users')
+      .collection('users')
+      .findOne({ userId });
+
+    if (!userBoards?.boards?.length) return null;
+
+    return userBoards.boards;
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+export async function addNewColumn(
+  userId: string,
+  boardId: string,
+  newColumn: UserColumn,
+) {
+  try {
+    await mongoDBclient
+      .db('users')
+      .collection<Document>('users')
+      .updateOne(
+        { userId, 'boards.boardId': boardId },
+        { $push: { 'boards.$.columns': newColumn } },
+      );
+
+    revalidatePath('/board');
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+export async function deleteColumn(
+  userId: string,
+  boardId: string,
+  newColumns: UserColumn[],
+) {
+  try {
+    await mongoDBclient
+      .db('users')
+      .collection<Document>('users')
+      .updateOne(
+        { userId, 'boards.boardId': boardId },
+        { $set: { 'boards.$.columns': newColumns } },
+      );
 
     revalidatePath('/board');
   } catch (e) {
@@ -85,16 +113,21 @@ export async function deleteColumn(userId: string, newColumns: UserColumn[]) {
 
 export async function updateColumnTitle({
   userId,
+  boardId,
   newColumns,
 }: {
   userId: string;
+  boardId: string;
   newColumns: UserColumn[];
 }) {
   try {
     await mongoDBclient
       .db('users')
       .collection<Document>('users')
-      .updateOne({ userId }, { $set: { columns: newColumns } });
+      .updateOne(
+        { userId, 'boards.boardId': boardId },
+        { $set: { 'boards.$.columns': newColumns } },
+      );
 
     revalidatePath('/board');
   } catch (e) {
@@ -104,13 +137,17 @@ export async function updateColumnTitle({
 
 export async function updateColumnsPosition(
   userId: string,
+  boardId: string,
   newColumns: UserColumn[],
 ) {
   try {
     await mongoDBclient
       .db('users')
       .collection<Document>('users')
-      .updateOne({ userId }, { $set: { columns: newColumns } });
+      .updateOne(
+        { userId, 'boards.boardId': boardId },
+        { $set: { 'boards.$.columns': newColumns } },
+      );
 
     revalidatePath('/board');
   } catch (e) {
@@ -118,12 +155,19 @@ export async function updateColumnsPosition(
   }
 }
 
-export async function addNewNote(userId: string, newColumns: UserColumn[]) {
+export async function addNewNote(
+  userId: string,
+  boardId: string,
+  newColumns: UserColumn[],
+) {
   try {
     await mongoDBclient
       .db('users')
       .collection<Document>('users')
-      .updateOne({ userId }, { $set: { columns: newColumns } });
+      .updateOne(
+        { userId, 'boards.boardId': boardId },
+        { $set: { 'boards.$.columns': newColumns } },
+      );
 
     revalidatePath('/board');
   } catch (e) {

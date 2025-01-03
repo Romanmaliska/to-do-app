@@ -1,3 +1,4 @@
+import { useParams } from 'next/navigation';
 import { useState } from 'react';
 import { BsPlus } from 'react-icons/bs';
 
@@ -19,6 +20,7 @@ export default function AddColumnButton({
   setOptimisticColumns,
 }: Props) {
   const [isAddColumnClicked, setIsAddColumnClicked] = useState(false);
+  const { boardId } = useParams<{ boardId: string }>();
 
   const handleAddColumnTitle = async (formData: FormData) => {
     setIsAddColumnClicked(false);
@@ -29,6 +31,7 @@ export default function AddColumnButton({
       columns,
       columnTitle,
       userId,
+      boardId,
     });
   };
 

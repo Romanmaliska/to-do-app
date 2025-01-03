@@ -9,6 +9,7 @@ import {
 import { DndContext, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext } from '@dnd-kit/sortable';
 import dynamic from 'next/dynamic';
+import { useParams } from 'next/navigation';
 import { useMemo, useOptimistic, useState, useTransition } from 'react';
 
 import {
@@ -31,6 +32,8 @@ type Props = {
 
 export default function NotesBoard({ columns, userId }: Props) {
   const [optimisticColumns, setOptimisticColumns] = useOptimistic(columns);
+
+  const { boardId } = useParams<{ boardId: string }>();
 
   const [_, startTransition] = useTransition();
 
@@ -65,19 +68,15 @@ export default function NotesBoard({ columns, userId }: Props) {
       const activeIndex = active.data?.current?.column.columnIndex;
       const overIndex = over.data?.current?.column.columnIndex;
 
-      const newColumns = columns.map((col) => {
-        if (col.columnIndex === activeIndex) {
-          return { ...col, columnIndex: overIndex };
-        }
-        if (col.columnIndex === overIndex) {
-          return { ...col, columnIndex: activeIndex };
-        }
-        return col;
-      });
+      if (activeIndex === overIndex || !activeIndex || !overIndex) return;
+
+      const newColumns = columns
+        .with(activeIndex, columns[overIndex])
+        .with(overIndex, columns[activeIndex]);
 
       startTransition(async () => {
         setOptimisticColumns(newColumns);
-        await updateColumnsPosition(userId, newColumns);
+        await updateColumnsPosition(userId, boardId, newColumns);
       });
     }
 

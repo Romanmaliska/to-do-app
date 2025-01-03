@@ -2,10 +2,16 @@ import { Document, WithId } from 'mongodb';
 
 export type User = {
   userId: string;
-  columns: UserColumn[];
+  boards: UserBoard[];
 };
 
 export type UserDocument = WithId<Document> & User;
+
+export type UserBoard = {
+  boardName: string;
+  boardId: string;
+  columns?: UserColumn[];
+};
 
 export type UserColumn = {
   columnTitle: string;

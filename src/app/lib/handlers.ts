@@ -11,11 +11,13 @@ export async function handleAddColumn({
   columns,
   columnTitle,
   userId,
+  boardId,
 }: {
   setOptimisticColumns: (columns: UserColumn[] | null) => void;
   columns: UserColumn[] | null;
   columnTitle: string;
   userId: string;
+  boardId: string;
 }) {
   const newColumn = {
     columnTitle,
@@ -27,7 +29,7 @@ export async function handleAddColumn({
   setOptimisticColumns([...(columns || []), newColumn]);
 
   try {
-    await addNewColumn(userId, newColumn);
+    await addNewColumn(userId, boardId, newColumn);
   } catch {
     setOptimisticColumns(columns);
   }
@@ -38,6 +40,7 @@ export async function handleDeleteColumn(
   columnId: string,
   columns: UserColumn[],
   userId: string,
+  boardId: string,
 ) {
   const newColumns = columns.reduce<UserColumn[]>((acc, curr) => {
     if (curr.columnId === columnId) return acc;
@@ -47,7 +50,7 @@ export async function handleDeleteColumn(
   setOptimisticColumns(newColumns);
 
   try {
-    await deleteColumn(userId, newColumns);
+    await deleteColumn(userId, boardId, newColumns);
   } catch {
     setOptimisticColumns(columns);
   }
@@ -59,12 +62,14 @@ export async function handleAddNote({
   columnId,
   noteText,
   userId,
+  boardId,
 }: {
   setOptimisticColumns: (columns: UserColumn[]) => void;
   columns: UserColumn[];
   columnId: string;
   noteText: string;
   userId: string;
+  boardId: string;
 }) {
   const newNote = {
     noteText,
@@ -81,7 +86,7 @@ export async function handleAddNote({
 
   try {
     setOptimisticColumns(newColumns);
-    await addNewNote(userId, newColumns);
+    await addNewNote(userId, boardId, newColumns);
   } catch {
     setOptimisticColumns(columns);
   }

@@ -1,3 +1,4 @@
+import { useParams } from 'next/navigation';
 import { FocusEvent, useState, useTransition } from 'react';
 import { FaRegTrashAlt } from 'react-icons/fa';
 
@@ -22,6 +23,7 @@ export default function NotesColumnHeader({
 }: Props) {
   const [_, startTransition] = useTransition();
   const [isColumnTitleUpdated, setIsColumnTitleUpdated] = useState(false);
+  const { boardId } = useParams<{ boardId: string }>();
 
   const handleUpdateColumnTitle = async (columnTitle: string) => {
     setIsColumnTitleUpdated(!isColumnTitleUpdated);
@@ -34,7 +36,7 @@ export default function NotesColumnHeader({
     });
 
     setOptimisticColumns(newColumns);
-    await updateColumnTitle({ newColumns, userId });
+    await updateColumnTitle({ newColumns, userId, boardId });
   };
 
   const handleBlur = (event: FocusEvent<HTMLInputElement>) => {
@@ -80,6 +82,7 @@ export default function NotesColumnHeader({
           column.columnId,
           columns,
           userId,
+          boardId,
         )}
       >
         <Button className='hover:bg-darkGrey' variant='ghost'>

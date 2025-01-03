@@ -1,3 +1,4 @@
+import { useParams } from 'next/navigation';
 import { FocusEvent, useState, useTransition } from 'react';
 import { BsPlus } from 'react-icons/bs';
 
@@ -22,6 +23,7 @@ export default function AddNoteButton({
 }: Props) {
   const [_, startTransition] = useTransition();
   const [isAddNoteClicked, setIsAddNoteClicked] = useState(false);
+  const { boardId } = useParams<{ boardId: string }>();
 
   const handleAddNoteText = async (noteText: string) => {
     setIsAddNoteClicked(!isAddNoteClicked);
@@ -34,6 +36,7 @@ export default function AddNoteButton({
       columnId,
       noteText,
       userId,
+      boardId,
     });
   };
 
