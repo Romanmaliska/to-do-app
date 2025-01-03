@@ -1,3 +1,4 @@
+import { useParams } from 'next/navigation';
 import { FocusEvent, useTransition } from 'react';
 
 import { deleteNote, updateNote } from '../actions/notesActions';
@@ -23,30 +24,7 @@ export default function UpdateNoteButton({
   userId,
 }: Props) {
   const [_, startTransition] = useTransition();
-
-  const handleUpdateNoteText = async (noteText: string) => {
-    if (!noteText || note.noteText === noteText) return;
-
-    const column = columns.find((col) => col.columnId === columnId);
-    const noteIndex = column?.notes.findIndex((n) => n.noteId === note.noteId);
-    const newColumns = columns.reduce((acc, curr) => {
-      if (curr.columnId === columnId) {
-        acc.push({
-          ...curr,
-          notes: curr.notes.map((n, i) =>
-            i === noteIndex ? { ...n, noteText } : n,
-          ),
-        });
-      } else {
-        acc.push(curr);
-      }
-      return acc;
-    }, [] as UserColumn[]);
-
-    setOptimisticColumns(newColumns);
-
-    await updateNote(userId, newColumns);
-  };
+  const { boardId } = useParams<{ boardId: string }>();
 
   const handleBlur = (event: FocusEvent<HTMLInputElement>) => {
     event.preventDefault();
@@ -56,8 +34,24 @@ export default function UpdateNoteButton({
 
     if (relatedTarget === 'saveButton') {
       const noteText = (event.target as HTMLButtonElement).form?.noteText.value;
+      if (!noteText || note.noteText === noteText) return;
+
+      const newNote = { ...note, noteText };
+      const newColumns = columns.map((col) => {
+        if (col.columnId === columnId) {
+          return {
+            ...col,
+            notes: col.notes.map((n) =>
+              n.noteId === note.noteId ? newNote : n,
+            ),
+          };
+        }
+        return col;
+      });
+
       startTransition(async () => {
-        await handleUpdateNoteText(noteText);
+        setOptimisticColumns(newColumns);
+        await updateNote(userId, boardId, newColumns);
       });
     }
 
@@ -69,7 +63,7 @@ export default function UpdateNoteButton({
 
       startTransition(async () => {
         setOptimisticColumns(newColumns);
-        await deleteNote(userId, newColumns);
+        await deleteNote(userId, boardId, newColumns);
       });
     }
   };

@@ -175,12 +175,39 @@ export async function addNewNote(
   }
 }
 
-export async function deleteNote(userId: string, newColumns: UserColumn[]) {
+export async function deleteNote(
+  userId: string,
+  boardId: string,
+  newColumns: UserColumn[],
+) {
   try {
     await mongoDBclient
       .db('users')
       .collection<Document>('users')
-      .updateOne({ userId }, { $set: { columns: newColumns } });
+      .updateOne(
+        { userId, 'boards.boardId': boardId },
+        { $set: { 'boards.$.columns': newColumns } },
+      );
+
+    revalidatePath('/board');
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+export async function updateNote(
+  userId: string,
+  boardId: string,
+  newColumns: UserColumn[],
+) {
+  try {
+    await mongoDBclient
+      .db('users')
+      .collection('users')
+      .updateOne(
+        { userId, 'boards.boardId': boardId },
+        { $set: { 'boards.$.columns': newColumns } },
+      );
 
     revalidatePath('/board');
   } catch (e) {
@@ -224,19 +251,6 @@ export async function moveNoteToEmptyColumn(
   userId: string,
   newColumns: UserColumn[],
 ) {
-  try {
-    await mongoDBclient
-      .db('users')
-      .collection('users')
-      .updateOne({ userId }, { $set: { columns: newColumns } });
-
-    revalidatePath('/board');
-  } catch (e) {
-    console.log(e);
-  }
-}
-
-export async function updateNote(userId: string, newColumns: UserColumn[]) {
   try {
     await mongoDBclient
       .db('users')

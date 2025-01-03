@@ -74,13 +74,10 @@ export async function handleAddNote({
   const newNote = {
     noteText,
     noteId: generateId(),
-    noteIndex:
-      columns.find((col) => col.columnId === columnId)?.notes.length || 0,
   };
 
   const newColumns = columns.map((col) => {
     if (col.columnId !== columnId) return col;
-
     return { ...col, notes: [...col.notes, newNote] };
   });
 

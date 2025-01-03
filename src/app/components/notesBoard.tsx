@@ -65,10 +65,13 @@ export default function NotesBoard({ columns, userId }: Props) {
 
     // dropped column on column
     if (draggedType === 'column' && draggedOverType === 'column') {
-      const activeIndex = active.data?.current?.column.columnIndex;
-      const overIndex = over.data?.current?.column.columnIndex;
+      const activeId = active.data?.current?.column.columnId;
+      const overId = over.data?.current?.column.columnId;
 
-      if (activeIndex === overIndex || !activeIndex || !overIndex) return;
+      if (!activeId || !overId) return;
+
+      const activeIndex = columns.findIndex((col) => col.columnId === activeId);
+      const overIndex = columns.findIndex((col) => col.columnId === overId);
 
       const newColumns = columns
         .with(activeIndex, columns[overIndex])
