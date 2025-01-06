@@ -13,10 +13,8 @@ import { useParams } from 'next/navigation';
 import { useMemo, useOptimistic, useState, useTransition } from 'react';
 
 import {
-  moveNoteToEmptyColumn,
+  updateColumns,
   updateColumnsPosition,
-  updateNotePositionInsideColumn,
-  updateNotePositionOutsideColumn,
 } from '@/app/actions/notesActions';
 import NotesColumn from '@/app/components/notesColumn';
 import type { UserColumn, UserNote } from '@/app/types/user';
@@ -108,7 +106,7 @@ export default function NotesBoard({ columns, userId }: Props) {
 
       startTransition(async () => {
         setOptimisticColumns(newColumns);
-        await updateNotePositionInsideColumn(userId, boardId, newColumns);
+        await updateColumns(userId, boardId, newColumns);
       });
     }
 
@@ -118,7 +116,13 @@ export default function NotesBoard({ columns, userId }: Props) {
 
   const handleNoteDragOver = (event: DragOverEvent) => {
     const { active, over } = event;
-    if (!over || !columns) return;
+
+    if (
+      !over ||
+      !columns ||
+      active.data?.current?.columnId === over.data?.current?.columnId
+    )
+      return;
 
     const activeId = active.id as string;
     const overId = over.id as string;
@@ -127,137 +131,79 @@ export default function NotesBoard({ columns, userId }: Props) {
     const isActiveNote = active.data?.current?.type === 'note';
     const isOverNote = over.data?.current?.type === 'note';
     const isOverColumn = over.data?.current?.type === 'column';
-    const isAlreadyNoteInColumn =
-      isOverColumn &&
-      over?.data?.current?.column.notes?.some(
-        (note: UserNote) => note.noteId === activeId,
-      );
+    const activeColumnIndex = columns.findIndex(
+      (col) => active.data?.current?.columnId === col.columnId,
+    );
 
-    console.log(isAlreadyNoteInColumn, 'is already note in column');
-    if (!isActiveNote || isAlreadyNoteInColumn) return;
+    const overColumnIndex = columns.findIndex(
+      (col) =>
+        overId === col.columnId ||
+        over.data?.current?.columnId === col.columnId,
+    );
 
-    console.log('should not be here');
+    const activeNote = columns[activeColumnIndex].notes.find(
+      (note) => note.noteId === activeId,
+    );
+
+    if (
+      !isActiveNote ||
+      !activeNote ||
+      activeColumnIndex < 0 ||
+      overColumnIndex < 0 ||
+      activeColumnIndex === overColumnIndex
+    )
+      return;
+
+    let newColumns = columns;
 
     // dropped note on note in different column
     if (isOverNote) {
-      const activeColumnIndex = columns.findIndex((col) =>
-        col.notes.find((note) => note.noteId === activeId),
-      );
-
-      const overColumnIndex = columns.findIndex((col) =>
-        col.notes.find((note) => note.noteId === overId),
-      );
-
-      if (activeColumnIndex < 0 && overColumnIndex < 0) return;
-
-      const activeNoteIndex = columns[activeColumnIndex].notes.findIndex(
-        (note) => note.noteId === activeId,
-      );
-
       const overNoteIndex = columns[overColumnIndex].notes.findIndex(
         (note) => note.noteId === overId,
       );
-
-      const activeNote = columns[activeColumnIndex].notes.find(
-        (note) => note.noteId === activeId,
-      );
-
-      if (!activeNote) return;
-
-      if (activeColumnIndex !== overColumnIndex) {
-        // add note to new column and increase noteIndexes
-        const newColumns = columns.map((col, index) => {
-          if (activeColumnIndex === index) {
-            return {
-              ...col,
-              notes: col.notes.reduce<UserNote[]>((acc, curr, i) => {
-                if (i < activeNoteIndex) return [...acc, curr];
-                if (i === activeNoteIndex) return acc;
-                return [...acc, { ...curr, noteIndex: i - 1 }];
-              }, []),
-            };
-          }
-
-          if (overColumnIndex === index) {
-            return {
-              ...col,
-              notes: col.notes.reduce<UserNote[]>((acc, curr, i) => {
-                if (i < overNoteIndex) return [...acc, curr];
-                if (i === overNoteIndex)
-                  return [
-                    ...acc,
-                    { ...curr, noteIndex: i },
-                    { ...activeNote, noteIndex: i + 1 },
-                  ];
-                return [...acc, { ...curr, noteIndex: i + 2 }];
-              }, []),
-            };
-          }
-
-          return col;
-        });
-
-        startTransition(async () => {
-          setOptimisticColumns(
-            newColumns.map((col) => ({
-              ...col,
-              notes: col.notes.toSorted((a, b) => a.noteIndex - b.noteIndex),
-            })),
-          );
-          await updateNotePositionOutsideColumn(userId, newColumns);
-        });
-
-        return;
-      }
-    }
-
-    // dropped note on empty column
-    if (isOverColumn) {
-      const activeColumnIndex = columns.findIndex((col) =>
-        col.notes.find((note) => note.noteId === activeId),
-      );
-      const activeNoteIndex = columns[activeColumnIndex].notes.findIndex(
-        (note) => note.noteId === activeId,
-      );
-
-      const activeNote = columns[activeColumnIndex].notes.find(
-        (note) => note.noteId === activeId,
-      );
-
-      if (!activeNote) return;
-
-      const newColumns = columns.map((col, index) => {
-        if (overId === col.columnId) {
-          return {
-            ...col,
-            notes: [{ ...activeNote, noteIndex: 0 }],
-          };
-        }
+      newColumns = columns.map((col, index) => {
         if (activeColumnIndex === index) {
           return {
             ...col,
-            notes: col.notes.reduce<UserNote[]>((acc, curr, i) => {
-              if (i < activeNoteIndex) return [...acc, curr];
-              if (i === activeNoteIndex) return acc;
-              return [...acc, { ...curr, noteIndex: i - 1 }];
-            }, []),
+            notes: col.notes.filter((note) => note.noteId !== activeId),
+          };
+        }
+
+        if (overColumnIndex === index) {
+          return {
+            ...col,
+            notes: col.notes.toSpliced(overNoteIndex + 1, 0, activeNote),
           };
         }
 
         return col;
       });
+    }
 
-      startTransition(async () => {
-        setOptimisticColumns(
-          newColumns.map((col) => ({
+    // dropped note on empty column
+    if (isOverColumn) {
+      newColumns = columns.map((col, index) => {
+        if (overId === col.columnId) {
+          return {
             ...col,
-            notes: col.notes.toSorted((a, b) => a.noteIndex - b.noteIndex),
-          })),
-        );
-
-        await moveNoteToEmptyColumn(userId, newColumns);
+            notes: [activeNote],
+          };
+        }
+        if (activeColumnIndex === index) {
+          return {
+            ...col,
+            notes: col.notes.filter((note) => note.noteId !== activeId),
+          };
+        }
+        return col;
       });
     }
+
+    startTransition(async () => {
+      setOptimisticColumns(newColumns);
+
+      await updateColumns(userId, boardId, newColumns);
+    });
   };
 
   const sensors = useSensors(

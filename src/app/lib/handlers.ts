@@ -21,7 +21,6 @@ export async function handleAddColumn({
 }) {
   const newColumn = {
     columnTitle,
-    columnIndex: columns?.length || 0,
     columnId: generateId(),
     notes: [],
   };
@@ -42,14 +41,10 @@ export async function handleDeleteColumn(
   userId: string,
   boardId: string,
 ) {
-  const newColumns = columns.reduce<UserColumn[]>((acc, curr) => {
-    if (curr.columnId === columnId) return acc;
-    return [...acc, { ...curr, columnIndex: acc.length }];
-  }, []);
-
-  setOptimisticColumns(newColumns);
+  const newColumns = columns.filter((col) => col.columnId !== columnId);
 
   try {
+    setOptimisticColumns(newColumns);
     await deleteColumn(userId, boardId, newColumns);
   } catch {
     setOptimisticColumns(columns);

@@ -1,7 +1,7 @@
 import { useParams } from 'next/navigation';
 import { FocusEvent, useTransition } from 'react';
 
-import { deleteNote, updateNote } from '../actions/notesActions';
+import { updateColumns } from '../actions/notesActions';
 import { UserColumn, UserNote } from '../types/user';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -51,7 +51,7 @@ export default function UpdateNoteButton({
 
       startTransition(async () => {
         setOptimisticColumns(newColumns);
-        await updateNote(userId, boardId, newColumns);
+        await updateColumns(userId, boardId, newColumns);
       });
     }
 
@@ -63,7 +63,7 @@ export default function UpdateNoteButton({
 
       startTransition(async () => {
         setOptimisticColumns(newColumns);
-        await deleteNote(userId, boardId, newColumns);
+        await updateColumns(userId, boardId, newColumns);
       });
     }
   };

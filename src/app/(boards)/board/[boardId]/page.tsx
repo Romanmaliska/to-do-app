@@ -12,7 +12,6 @@ export default async function BoardPage({ params }: Props) {
   if (!userId) return redirectToSignIn();
 
   const userBoards: UserBoard[] | null = await getBoards(userId);
-  console.log(userBoards, 'from BE');
 
   const { boardId } = await params;
   const columns =
