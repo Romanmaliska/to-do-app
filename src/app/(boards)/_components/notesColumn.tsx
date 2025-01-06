@@ -2,10 +2,10 @@ import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useMemo } from 'react';
 
+import Note from '@/app/(boards)/_components/note';
 import { UserColumn, UserNote } from '@/app/types/user';
 
 import AddNoteButton from './addNoteButton';
-import Note from './note';
 import NotesColumnHeader from './notesColumnHeader';
 
 type Props = {

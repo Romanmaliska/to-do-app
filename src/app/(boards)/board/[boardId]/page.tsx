@@ -1,7 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
 
+import NotesBoard from '@/app/(boards)/_components/notesBoard';
 import { getBoards } from '@/app/actions/notesActions';
-import NotesBoard from '@/app/components/notesBoard';
 import { UserBoard } from '@/app/types/user';
 
 type Props = { params: Promise<{ boardId: string }> };

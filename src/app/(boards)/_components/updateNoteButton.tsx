@@ -1,10 +1,10 @@
 import { useParams } from 'next/navigation';
 import { FocusEvent, useTransition } from 'react';
 
-import { updateColumns } from '../actions/notesActions';
-import { UserColumn, UserNote } from '../types/user';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
+import { updateColumns } from '../../actions/notesActions';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import { UserColumn, UserNote } from '../../types/user';
 
 type Props = {
   columns: UserColumn[];

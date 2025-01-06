@@ -2,11 +2,11 @@ import { useParams } from 'next/navigation';
 import { FocusEvent, useState, useTransition } from 'react';
 import { BsPlus } from 'react-icons/bs';
 
-import { handleAddNote } from '../lib/handlers';
-import { UserColumn } from '../types/user';
-import { Button } from './ui/button';
-import CloseButton from './ui/closeButton';
-import { Input } from './ui/input';
+import CloseButton from '@/app/(boards)/_components/closeButton';
+import { Button } from '@/app/components/ui/button';
+import { Input } from '@/app/components/ui/input';
+import { handleAddNote } from '@/app/lib/handlers';
+import { UserColumn } from '@/app/types/user';
 
 type Props = {
   columns: UserColumn[];

@@ -2,11 +2,11 @@ import { useParams } from 'next/navigation';
 import { FocusEvent, useState, useTransition } from 'react';
 import { FaRegTrashAlt } from 'react-icons/fa';
 
-import { updateColumnTitle } from '../actions/notesActions';
-import { handleDeleteColumn } from '../lib/handlers';
-import { UserColumn } from '../types/user';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
+import { updateColumnTitle } from '../../actions/notesActions';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import { handleDeleteColumn } from '../../lib/handlers';
+import { UserColumn } from '../../types/user';
 
 type Props = {
   setOptimisticColumns: (columns: UserColumn[]) => void;
