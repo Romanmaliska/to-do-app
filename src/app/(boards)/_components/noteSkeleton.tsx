@@ -1,7 +1,7 @@
-import { UserNote } from '../types/user';
+import { UserNote } from '@/app/types/user';
 
 type Props = {
-  draggeNote: UserNote | null;
+  draggedNote: UserNote;
 };
 
 export default function NoteSkeleton({ draggedNote }: Props) {
