@@ -36,7 +36,12 @@ export default function NotesColumnHeader({
     });
 
     setOptimisticColumns(newColumns);
-    await updateColumnTitle({ newColumns, userId, boardId });
+    await updateColumnTitle({
+      userId,
+      boardId,
+      columnId: column.columnId,
+      columnTitle,
+    });
   };
 
   const handleBlur = (event: FocusEvent<HTMLInputElement>) => {

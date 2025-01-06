@@ -6,7 +6,7 @@ import {
   getBoards,
   testDatabaseConnection,
 } from '@/app/actions/notesActions';
-import type { UserBoard, UserColumn } from '@/app/types/user';
+import type { UserBoard } from '@/app/types/user';
 
 export default async function BoardsPage() {
   const isMongoDBAlive = await testDatabaseConnection();

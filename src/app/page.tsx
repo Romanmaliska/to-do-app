@@ -1,11 +1,17 @@
 'use server';
 
 import { SignedOut } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import Form from 'next/form';
+import { redirect } from 'next/navigation';
 
 import { Button } from './components/ui/button';
 
 export default async function Home() {
+  const { userId } = await auth();
+  
+  if (userId) redirect('/boards');
+
   return (
     <div className='w-1/2 p-16'>
       <div className='flex flex-col gap-8 items-start'>

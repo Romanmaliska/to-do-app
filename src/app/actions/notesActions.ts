@@ -94,7 +94,7 @@ export async function addNewColumn(
 export async function deleteColumn(
   userId: string,
   boardId: string,
-  newColumns: UserColumn[],
+  columnId: string,
 ) {
   try {
     await mongoDBclient
@@ -102,7 +102,7 @@ export async function deleteColumn(
       .collection<Document>('users')
       .updateOne(
         { userId, 'boards.boardId': boardId },
-        { $set: { 'boards.$.columns': newColumns } },
+        { $pull: { 'boards.$.columns': { columnId } } },
       );
 
     revalidatePath('/board');
@@ -114,59 +114,35 @@ export async function deleteColumn(
 export async function updateColumnTitle({
   userId,
   boardId,
-  newColumns,
+  columnId,
+  columnTitle,
 }: {
   userId: string;
   boardId: string;
-  newColumns: UserColumn[];
+  columnId: string;
+  columnTitle: string;
 }) {
   try {
     await mongoDBclient
       .db('users')
       .collection<Document>('users')
       .updateOne(
-        { userId, 'boards.boardId': boardId },
-        { $set: { 'boards.$.columns': newColumns } },
-      );
-
-    revalidatePath('/board');
-  } catch (e) {
-    console.log(e);
-  }
-}
-
-export async function updateColumnsPosition(
-  userId: string,
-  boardId: string,
-  newColumns: UserColumn[],
-) {
-  try {
-    await mongoDBclient
-      .db('users')
-      .collection<Document>('users')
-      .updateOne(
-        { userId, 'boards.boardId': boardId },
-        { $set: { 'boards.$.columns': newColumns } },
-      );
-
-    revalidatePath('/board');
-  } catch (e) {
-    console.log(e);
-  }
-}
-
-export async function addNewNote(
-  userId: string,
-  boardId: string,
-  newColumns: UserColumn[],
-) {
-  try {
-    await mongoDBclient
-      .db('users')
-      .collection<Document>('users')
-      .updateOne(
-        { userId, 'boards.boardId': boardId },
-        { $set: { 'boards.$.columns': newColumns } },
+        {
+          userId,
+          'boards.boardId': boardId,
+          'boards.columns.columnId': columnId,
+        },
+        {
+          $set: {
+            'boards.$[board].columns.$[column].columnTitle': columnTitle,
+          },
+        },
+        {
+          arrayFilters: [
+            { 'board.boardId': boardId },
+            { 'column.columnId': columnId },
+          ],
+        },
       );
 
     revalidatePath('/board');

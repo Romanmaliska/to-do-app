@@ -1,7 +1,7 @@
 import {
   addNewColumn,
-  addNewNote,
   deleteColumn,
+  updateColumns,
 } from '../actions/notesActions';
 import { UserColumn } from '../types/user';
 import { generateId } from './utils';
@@ -45,7 +45,7 @@ export async function handleDeleteColumn(
 
   try {
     setOptimisticColumns(newColumns);
-    await deleteColumn(userId, boardId, newColumns);
+    await deleteColumn(userId, boardId, columnId);
   } catch {
     setOptimisticColumns(columns);
   }
@@ -78,7 +78,7 @@ export async function handleAddNote({
 
   try {
     setOptimisticColumns(newColumns);
-    await addNewNote(userId, boardId, newColumns);
+    await updateColumns(userId, boardId, newColumns);
   } catch {
     setOptimisticColumns(columns);
   }

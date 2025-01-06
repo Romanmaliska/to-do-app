@@ -12,10 +12,7 @@ import dynamic from 'next/dynamic';
 import { useParams } from 'next/navigation';
 import { useMemo, useOptimistic, useState, useTransition } from 'react';
 
-import {
-  updateColumns,
-  updateColumnsPosition,
-} from '@/app/actions/notesActions';
+import { updateColumns } from '@/app/actions/notesActions';
 import NotesColumn from '@/app/components/notesColumn';
 import type { UserColumn, UserNote } from '@/app/types/user';
 
@@ -77,7 +74,7 @@ export default function NotesBoard({ columns, userId }: Props) {
 
       startTransition(async () => {
         setOptimisticColumns(newColumns);
-        await updateColumnsPosition(userId, boardId, newColumns);
+        await updateColumns(userId, boardId, newColumns);
       });
     }
 
