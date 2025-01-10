@@ -21,7 +21,7 @@ export async function handleAddColumn({
 }) {
   const newColumn = {
     columnTitle,
-    columnId: generateId(),
+    columnId: `column-${generateId()}`,
     notes: [],
   };
 
@@ -68,7 +68,7 @@ export async function handleAddNote({
 }) {
   const newNote = {
     noteText,
-    noteId: generateId(),
+    noteId: `note-${generateId()}`,
   };
 
   const newColumns = columns.map((col) => {

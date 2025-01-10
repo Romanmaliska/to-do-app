@@ -40,7 +40,7 @@ export async function createNewBoard(userId: string, formData: FormData) {
   const boardName = formData.get('boardName') as string;
 
   const newBoard: UserBoard = {
-    boardId: generateId(),
+    boardId: `board-${generateId()}`,
     boardName,
   };
 
