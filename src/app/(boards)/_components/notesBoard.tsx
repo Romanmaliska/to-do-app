@@ -177,13 +177,13 @@ export default function NotesBoard({ columns, userId }: Props) {
       });
     }
 
-    // dropped note on empty column
+    // dropped note on column
     if (isOverColumn) {
       newColumns = columns.map((col, index) => {
         if (overId === col.columnId) {
           return {
             ...col,
-            notes: [activeNote],
+            notes: [activeNote, ...col.notes],
           };
         }
         if (activeColumnIndex === index) {
