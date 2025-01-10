@@ -3,6 +3,7 @@
 import { SignedIn, UserButton } from '@clerk/nextjs';
 import { auth } from '@clerk/nextjs/server';
 import { PopoverClose } from '@radix-ui/react-popover';
+import Link from 'next/link';
 import { BsPlus } from 'react-icons/bs';
 
 import { Label } from '@/app/components/ui/label';
@@ -21,7 +22,9 @@ export default async function Navbar() {
 
   return (
     <nav className='flex justify-between align-middle gap-4 w-full p-2 text-white'>
-      <h1 className='font-extrabold'>Another Todo App</h1>
+      <Link href={userId ? '/boards' : '/'}>
+        <h1 className='font-extrabold'>Another Todo App</h1>
+      </Link>
       <SignedIn>
         <div className='flex gap-8 align-middle'>
           <Popover>
