@@ -10,6 +10,7 @@ export type UserDocument = WithId<Document> & User;
 export type UserBoard = {
   boardName: string;
   boardId: string;
+  starred: boolean;
   columns?: UserColumn[];
 };
 

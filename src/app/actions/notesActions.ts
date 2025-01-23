@@ -42,6 +42,7 @@ export async function createNewBoard(userId: string, formData: FormData) {
   const newBoard: UserBoard = {
     boardId: `board-${generateId()}`,
     boardName,
+    starred: false,
   };
 
   try {
@@ -66,6 +67,27 @@ export async function getBoards(userId: string) {
     if (!userBoards?.boards?.length) return null;
 
     return userBoards.boards;
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+export async function starBoard(
+  userId: string,
+  boardId: string,
+  starred: boolean,
+) {
+  try {
+    const userBoards = await mongoDBclient
+      .db('users')
+      .collection('users')
+      .updateOne(
+        { userId },
+        { $set: { 'boards.$[board].starred': starred } },
+        { arrayFilters: [{ 'board.boardId': boardId }] },
+      );
+
+    revalidatePath('/boards');
   } catch (e) {
     console.log(e);
   }

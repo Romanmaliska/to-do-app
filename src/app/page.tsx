@@ -3,6 +3,7 @@
 import { SignedOut } from '@clerk/nextjs';
 import { auth } from '@clerk/nextjs/server';
 import Form from 'next/form';
+import Image from 'next/image';
 import { redirect } from 'next/navigation';
 
 import { Button } from './components/ui/button';
@@ -13,8 +14,8 @@ export default async function Home() {
   if (userId) redirect('/boards');
 
   return (
-    <div className='w-1/2 p-16'>
-      <div className='flex flex-col gap-8 items-start'>
+    <div className='flex justify-between w-full'>
+      <div className='flex flex-col gap-8 items-start w-full md:w-1/2 p-16'>
         <h1 className='font-extrabold text-white text-6xl'>
           Your Brain is Full. Let Us Hold the Rest.
         </h1>
@@ -43,7 +44,9 @@ export default async function Home() {
           </Form>
         </SignedOut>
       </div>
-      <div className='w-1/2'></div>
+      <div className='hidden md:flex items-center place-content-center w-1/2'>
+        <Image src='/preview.png' alt='hero' width={800} height={800} />
+      </div>
     </div>
   );
 }

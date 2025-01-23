@@ -1,9 +1,9 @@
 import { auth } from '@clerk/nextjs/server';
 import { PopoverClose } from '@radix-ui/react-popover';
-import Link from 'next/link';
 import { BsPlus } from 'react-icons/bs';
 import { FaRegUser } from 'react-icons/fa';
 
+import BoardTile from '@/app/(boards)/boards/[[...slug]]/boardTile';
 import {
   createNewBoard,
   createNewUser,
@@ -31,6 +31,7 @@ export default async function BoardsPage() {
   await createNewUser(userId);
 
   const userBoards: UserBoard[] | null = await getBoards(userId);
+  const starredBoards = userBoards?.filter((board) => board.starred) || [];
 
   return (
     <div className='max-w-[1080px] mx-auto p-8'>
@@ -39,23 +40,21 @@ export default async function BoardsPage() {
       </h1>
       <div className='flex items-center gap-4 pb-8'>
         <FaRegUser className='text-white' size={16} />
-        <h1 className='font-extrabold text-xl text-white'>Stared boards</h1>
+        <h1 className='font-extrabold text-xl text-white'>Starred boards</h1>
+      </div>
+      <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pb-4'>
+        {starredBoards?.map((board) => (
+          <BoardTile key={board.boardId} board={board} userId={userId} />
+        ))}
       </div>
       <div className='flex items-center gap-4 pb-8'>
         <FaRegUser className='text-white' size={16} />
         <h1 className='font-extrabold text-xl text-white'>Your boards</h1>
       </div>
-      <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'>
+      <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pb-4'>
         {userBoards?.map((board) => {
           return (
-            <Link href={`/board/${board.boardId}`} key={board.boardId}>
-              <div
-                key={board.boardId}
-                className='w-[200px] h-[100px] bg-grey rounded-md p-4'
-              >
-                <h2>{board.boardName}</h2>
-              </div>
-            </Link>
+            <BoardTile key={board.boardId} board={board} userId={userId} />
           );
         })}
         <Popover>
@@ -82,15 +81,6 @@ export default async function BoardsPage() {
                 action={createNewBoard.bind(null, userId as string)}
               >
                 <div className='flex flex-col gap-4'>
-                  <Label htmlFor='boardName'>Background</Label>
-                  <Input
-                    id='boardName'
-                    className='col-span-2 h-8'
-                    placeholder='Board name'
-                    type='text'
-                    name='boardName'
-                    minLength={1}
-                  />
                   <Label htmlFor='boardName'>Board name</Label>
                   <Input
                     id='boardName'
