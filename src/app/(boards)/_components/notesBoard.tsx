@@ -14,24 +14,22 @@ import { useMemo, useOptimistic, useState, useTransition } from 'react';
 
 import NotesColumn from '@/app/(boards)/_components/notesColumn';
 import { updateColumns } from '@/app/actions/notesActions';
-import type { UserColumn, UserNote } from '@/app/types/user';
+import type { UserBoard, UserColumn, UserNote } from '@/app/types/user';
 
 import AddColumnButton from './addColumnButton';
 
 const Portal = dynamic(() => import('./portal'), { ssr: false });
 
 type Props = {
-  columns: UserColumn[] | null;
+  board: UserBoard | null;
   userId: string;
 };
 
-export default function NotesBoard({ columns, userId }: Props) {
+export default function NotesBoard({ board, userId }: Props) {
+  const { columns = null, boardName } = board || {};
   const [optimisticColumns, setOptimisticColumns] = useOptimistic(columns);
-
   const { boardId } = useParams<{ boardId: string }>();
-
   const [_, startTransition] = useTransition();
-
   const columnsIds = useMemo(
     () => (columns ? columns.map((col) => col.columnId) : []),
     [columns],
@@ -210,34 +208,39 @@ export default function NotesBoard({ columns, userId }: Props) {
   );
 
   return (
-    <div className='flex gap-4'>
-      <DndContext
-        onDragStart={handleDragStart}
-        onDragOver={handleNoteDragOver}
-        onDragEnd={handleDragEnd}
-        sensors={sensors}
-      >
-        <SortableContext items={columnsIds}>
-          {optimisticColumns &&
-            optimisticColumns.map((column) => (
-              <NotesColumn
-                key={column.columnId}
-                columns={optimisticColumns}
-                column={column}
-                notes={column.notes}
-                userId={userId}
-                setOptimisticColumns={setOptimisticColumns}
-              />
-            ))}
-        </SortableContext>
-        <Portal draggedColumn={draggedColumn} draggedNote={draggedNote} />
-      </DndContext>
+    <div className='m-4'>
+      <h2 className='text-white font-extrabold text-xl pb-6'>
+        Your Board {boardName || ''}
+      </h2>
+      <div className='flex gap-4'>
+        <DndContext
+          onDragStart={handleDragStart}
+          onDragOver={handleNoteDragOver}
+          onDragEnd={handleDragEnd}
+          sensors={sensors}
+        >
+          <SortableContext items={columnsIds}>
+            {optimisticColumns &&
+              optimisticColumns.map((column) => (
+                <NotesColumn
+                  key={column.columnId}
+                  columns={optimisticColumns}
+                  column={column}
+                  notes={column.notes}
+                  userId={userId}
+                  setOptimisticColumns={setOptimisticColumns}
+                />
+              ))}
+          </SortableContext>
+          <Portal draggedColumn={draggedColumn} draggedNote={draggedNote} />
+        </DndContext>
 
-      <AddColumnButton
-        setOptimisticColumns={setOptimisticColumns}
-        columns={optimisticColumns}
-        userId={userId}
-      />
+        <AddColumnButton
+          setOptimisticColumns={setOptimisticColumns}
+          columns={optimisticColumns}
+          userId={userId}
+        />
+      </div>
     </div>
   );
 }

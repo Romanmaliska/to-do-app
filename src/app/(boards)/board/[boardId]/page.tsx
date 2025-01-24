@@ -12,8 +12,7 @@ export default async function BoardPage({ params }: Props) {
 
   const userBoards: UserBoard[] | null = await getBoards(userId);
   const { boardId } = await params;
-  const columns =
-    userBoards?.find((board) => board.boardId === boardId)?.columns || null;
+  const board = userBoards?.find((board) => board.boardId === boardId) || null;
 
-  return <NotesBoard userId={userId} columns={columns} />;
+  return <NotesBoard userId={userId} board={board} />;
 }
