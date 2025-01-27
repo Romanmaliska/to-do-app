@@ -81,8 +81,10 @@ export default function NotesBoard({ board, userId }: Props) {
       const activeNote = active.data?.current?.note;
       const overNote = over.data?.current?.note;
       const columnId = active.data?.current?.columnId;
+      const overColumnId = over.data?.current?.columnId;
 
-      if (activeNote.noteId === overNote.noteId || !columnId) return;
+      if (activeNote.noteId === overNote.noteId || columnId === overColumnId)
+        return;
 
       const newColumns = columns.map((col) => {
         if (col.columnId === columnId) {
@@ -196,7 +198,6 @@ export default function NotesBoard({ board, userId }: Props) {
 
     startTransition(async () => {
       setOptimisticColumns(newColumns);
-
       await updateColumns(userId, boardId, newColumns);
     });
   };
@@ -208,9 +209,9 @@ export default function NotesBoard({ board, userId }: Props) {
   );
 
   return (
-    <div className='m-4'>
+    <>
       <h2 className='text-white font-extrabold text-xl pb-6'>
-        Your Board {boardName || ''}
+        {boardName || ''}
       </h2>
       <div className='flex gap-4'>
         <DndContext
@@ -241,6 +242,6 @@ export default function NotesBoard({ board, userId }: Props) {
           userId={userId}
         />
       </div>
-    </div>
+    </>
   );
 }

@@ -1,6 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
 
 import NotesBoard from '@/app/(boards)/_components/notesBoard';
+import Sidebar from '@/app/(boards)/_components/sidebar';
 import { getBoards } from '@/app/actions/notesActions';
 import { UserBoard } from '@/app/types/user';
 
@@ -14,5 +15,14 @@ export default async function BoardPage({ params }: Props) {
   const { boardId } = await params;
   const board = userBoards?.find((board) => board.boardId === boardId) || null;
 
-  return <NotesBoard userId={userId} board={board} />;
+  return (
+    <>
+      <aside>
+        <Sidebar boardId={boardId} userBoards={userBoards} />
+      </aside>
+      <section>
+        <NotesBoard userId={userId} board={board} />;
+      </section>
+    </>
+  );
 }

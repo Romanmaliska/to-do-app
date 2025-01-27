@@ -1,9 +1,9 @@
 import { auth } from '@clerk/nextjs/server';
 import { PopoverClose } from '@radix-ui/react-popover';
 import { BsPlus } from 'react-icons/bs';
-import { FaRegUser } from 'react-icons/fa';
+import { FaRegUser, FaStar } from 'react-icons/fa';
 
-import BoardTile from '@/app/(boards)/boards/[[...slug]]/boardTile';
+import BoardTile from '@/app/(boards)/_components/boardTile';
 import {
   createNewBoard,
   createNewUser,
@@ -34,12 +34,12 @@ export default async function BoardsPage() {
   const starredBoards = userBoards?.filter((board) => board.starred) || [];
 
   return (
-    <div className='max-w-[1080px] mx-auto p-8'>
-      <h1 className='font-extrabold text-4xl text-white pb-8'>
-        Welcome to your boards page
-      </h1>
+    <div className='p-8'>
+      <p className='font-extrabold text-pretty text-4xl text-white pb-8'>
+        Welcome to your boards
+      </p>
       <div className='flex items-center gap-4 pb-8'>
-        <FaRegUser className='text-white' size={16} />
+        <FaStar className='text-white' size={16} />
         <h1 className='font-extrabold text-xl text-white'>Starred boards</h1>
       </div>
       <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pb-4'>
@@ -60,7 +60,7 @@ export default async function BoardsPage() {
         <Popover>
           <PopoverTrigger asChild>
             <Button
-              className='flex gap-2 align-middle bg-lightBlue text-white hover:bg-blue hover:text-white'
+              className='flex gap-2 align-middle w-[200px] max-w-[200px] bg-lightBlue text-white hover:bg-blue hover:text-white'
               variant={'outline'}
             >
               <BsPlus size={18} />

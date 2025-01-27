@@ -13,6 +13,7 @@ const config: Config = {
       white: '#FFFFFF',
       blue: '#0079BF',
       lighterBlue: '#3394CC',
+      darkerBlue: '#005180',
       lightBlue: '#FFFFFF3d',
       darkBlue: '#005C91',
       grey: '#F1F2F4',

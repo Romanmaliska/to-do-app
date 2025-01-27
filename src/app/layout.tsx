@@ -21,9 +21,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang='en'>
-        <body
-          className={clsx(inter.className, 'flex flex-col mx-auto antialiased')}
-        >
+        <body className={clsx(inter.className, 'flex flex-col antialiased')}>
           <header className='flex flex-2 p-2 bg-darkBlue'>
             <Navbar />
           </header>

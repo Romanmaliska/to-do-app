@@ -53,7 +53,7 @@ export default function Note({
 
   return (
     <div
-      className='m-1 px-4 py-2 bg-white rounded-lg focus-visible:ring-blue'
+      className='m-1 px-4 py-2 bg-white rounded-lg border-2 hover:border-blue hover:border-2 focus-visible:ring-blue'
       ref={setNodeRef}
       style={style}
       {...listeners}
