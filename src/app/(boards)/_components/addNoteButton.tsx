@@ -26,10 +26,7 @@ export default function AddNoteButton({
   const { boardId } = useParams<{ boardId: string }>();
 
   const handleAddNoteText = async (noteText: string) => {
-    setIsAddNoteClicked(!isAddNoteClicked);
-
     if (!noteText) return;
-
     await handleAddNote({
       setOptimisticColumns,
       columns,
@@ -41,12 +38,14 @@ export default function AddNoteButton({
   };
 
   const handleBlur = (event: FocusEvent<HTMLInputElement>) => {
+    setIsAddNoteClicked(!isAddNoteClicked);
     startTransition(async () => {
       await handleAddNoteText(event.target.value);
     });
   };
 
   const handleSubmit = async (formData: FormData) => {
+    setIsAddNoteClicked(!isAddNoteClicked);
     const columnTitle = formData.get('noteText') as string;
     await handleAddNoteText(columnTitle);
   };
