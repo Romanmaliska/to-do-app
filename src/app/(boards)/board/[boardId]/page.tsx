@@ -17,7 +17,7 @@ export default async function BoardPage({ params }: Props) {
 
   return (
     <>
-      <aside>
+      <aside className='px-2'>
         <Sidebar boardId={boardId} userBoards={userBoards} />
       </aside>
       <section>

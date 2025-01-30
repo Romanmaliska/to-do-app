@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
 import { FaStar } from 'react-icons/fa';
 import {
   MdOutlineKeyboardArrowLeft,
@@ -14,6 +13,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/app/components/ui/tooltip';
+import { useStore } from '@/app/lib/store/store';
 import { UserBoard } from '@/app/types/user';
 
 type Props = {
@@ -22,23 +22,25 @@ type Props = {
 };
 
 export default function Sidebar({ userBoards, boardId }: Props) {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const { isSidebarExpanded, toggleSidebarExpansion } = useStore();
 
   return (
     <div
-      className={`flex flex-col bg-gray-900 text-white mr-2 ${isExpanded ? 'w-52' : 'w-8'}`}
+      className={`flex flex-col bg-gray-900 text-white mr-2 ${isSidebarExpanded ? 'w-52' : 'w-8'}`}
     >
       <section className='flex justify-between place-content-start pb-4'>
-        <h2 className={`text-xl font-semibold ${!isExpanded && 'hidden'}`}>
+        <h2
+          className={`text-xl font-semibold ${!isSidebarExpanded && 'hidden'}`}
+        >
           Workspace
         </h2>
-        {isExpanded && (
+        {isSidebarExpanded && (
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger>
                 <MdOutlineKeyboardArrowLeft
                   className='rounded-full bg-darkBlue hover:bg-darkerBlue'
-                  onClick={() => setIsExpanded(!isExpanded)}
+                  onClick={toggleSidebarExpansion}
                   size={32}
                 />
                 <TooltipContent
@@ -54,13 +56,13 @@ export default function Sidebar({ userBoards, boardId }: Props) {
             </Tooltip>
           </TooltipProvider>
         )}
-        {!isExpanded && (
+        {!isSidebarExpanded && (
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger>
                 <MdOutlineKeyboardArrowRight
                   className='rounded-full bg-darkBlue hover:bg-darkerBlue'
-                  onClick={() => setIsExpanded(!isExpanded)}
+                  onClick={toggleSidebarExpansion}
                   size={32}
                 />
                 <TooltipContent
@@ -77,7 +79,9 @@ export default function Sidebar({ userBoards, boardId }: Props) {
           </TooltipProvider>
         )}
       </section>
-      <section className={`flex flex-col gap-2 ${!isExpanded && 'hidden'}`}>
+      <section
+        className={`flex flex-col gap-2 ${!isSidebarExpanded && 'hidden'}`}
+      >
         <h2 className='font-bold text-md'>Your boards</h2>
         {userBoards?.map((board) => (
           <Link
