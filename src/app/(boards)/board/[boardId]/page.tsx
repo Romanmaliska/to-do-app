@@ -21,7 +21,7 @@ export default async function BoardPage({ params }: Props) {
         <Sidebar boardId={boardId} userBoards={userBoards} />
       </aside>
       <section>
-        <NotesBoard userId={userId} board={board} />;
+        <NotesBoard userId={userId} board={board} />
       </section>
     </>
   );

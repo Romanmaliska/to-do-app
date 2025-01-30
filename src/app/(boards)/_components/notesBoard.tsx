@@ -83,7 +83,7 @@ export default function NotesBoard({ board, userId }: Props) {
       const columnId = active.data?.current?.columnId;
       const overColumnId = over.data?.current?.columnId;
 
-      if (activeNote.noteId === overNote.noteId || columnId === overColumnId)
+      if (activeNote.noteId === overNote.noteId || columnId !== overColumnId)
         return;
 
       const newColumns = columns.map((col) => {
