@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 
 import mongoDBclient from '@/app/lib/mongodb';
 import { generateId } from '@/app/lib/utils';
@@ -57,6 +58,19 @@ export async function createNewBoard(userId: string, formData: FormData) {
   }
 }
 
+export async function deleteBoard(userId: string, boardId: string) {
+  try {
+    await mongoDBclient
+      .db('users')
+      .collection<Document>('users')
+      .updateOne({ userId }, { $pull: { boards: { boardId } } });
+  } catch (e) {
+    console.log(e);
+  }
+
+  redirect('/boards');
+}
+
 export async function getBoards(userId: string) {
   try {
     const userBoards = await mongoDBclient
@@ -78,7 +92,7 @@ export async function starBoard(
   starred: boolean,
 ) {
   try {
-    const userBoards = await mongoDBclient
+    await mongoDBclient
       .db('users')
       .collection('users')
       .updateOne(

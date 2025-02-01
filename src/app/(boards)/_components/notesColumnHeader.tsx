@@ -2,7 +2,7 @@ import { useParams } from 'next/navigation';
 import { FocusEvent, useState, useTransition } from 'react';
 import { FaRegTrashAlt } from 'react-icons/fa';
 
-import { updateColumnTitle } from '../../actions/notesActions';
+import { updateColumnTitle } from '../../actions/actions';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { handleDeleteColumn } from '../../lib/handlers';

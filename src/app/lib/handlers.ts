@@ -2,7 +2,7 @@ import {
   addNewColumn,
   deleteColumn,
   updateColumns,
-} from '../actions/notesActions';
+} from '../actions/actions';
 import { UserColumn } from '../types/user';
 import { generateId } from './utils';
 

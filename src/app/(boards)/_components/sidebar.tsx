@@ -7,6 +7,7 @@ import {
   MdOutlineKeyboardArrowRight,
 } from 'react-icons/md';
 
+import DeleteBoardButton from '@/app/components/ui/deleteBoardButton';
 import {
   Tooltip,
   TooltipContent,
@@ -17,11 +18,12 @@ import { useStore } from '@/app/lib/store/store';
 import { UserBoard } from '@/app/types/user';
 
 type Props = {
+  userId: string;
   userBoards: UserBoard[] | null;
   boardId: UserBoard['boardId'];
 };
 
-export default function Sidebar({ userBoards, boardId }: Props) {
+export default function Sidebar({ userId, userBoards, boardId }: Props) {
   const { isSidebarExpanded, toggleSidebarExpansion } = useStore();
 
   return (
@@ -83,16 +85,24 @@ export default function Sidebar({ userBoards, boardId }: Props) {
         className={`flex flex-col gap-2 ${!isSidebarExpanded && 'hidden'}`}
       >
         <h2 className='font-bold text-md'>Your boards</h2>
+
         {userBoards?.map((board) => (
-          <Link
-            className={`flex justify-between place-items-center p-1 rounded-sm cursor-pointer hover:bg-darkBlue
-            ${board.boardId === boardId && 'bg-lightBlue pointer-events-none'}`}
+          <div
             key={board.boardId}
-            href={`/board/${board.boardId}`}
+            className={`flex justify-between place-items-center  px-1 rounded-sm cursor-pointer hover:bg-darkBlue  
+              ${board.boardId === boardId && 'bg-lightBlue'}`}
           >
-            <p>{board.boardName}</p>
-            {board.starred && <FaStar />}
-          </Link>
+            <Link
+              className={`w-full p-1 ${board.boardId === boardId && 'pointer-events-none'}`}
+              href={`/board/${board.boardId}`}
+            >
+              {board.boardName}
+            </Link>
+            <div className={`flex justify-between place-items-center gap-2`}>
+              <DeleteBoardButton userId={userId} board={board} />
+              {board.starred && <FaStar />}
+            </div>
+          </div>
         ))}
       </section>
     </div>

@@ -6,7 +6,7 @@ import {
   createNewUser,
   getBoards,
   testDatabaseConnection,
-} from '@/app/actions/notesActions';
+} from '@/app/actions/actions';
 import AddBoardButton from '@/app/components/ui/addBoardButton';
 import type { UserBoard } from '@/app/types/user';
 

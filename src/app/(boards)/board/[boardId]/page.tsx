@@ -2,7 +2,7 @@ import { auth } from '@clerk/nextjs/server';
 
 import NotesBoard from '@/app/(boards)/_components/notesBoard';
 import Sidebar from '@/app/(boards)/_components/sidebar';
-import { getBoards } from '@/app/actions/notesActions';
+import { getBoards } from '@/app/actions/actions';
 import { UserBoard } from '@/app/types/user';
 
 type Props = { params: Promise<{ boardId: string }> };
@@ -18,7 +18,7 @@ export default async function BoardPage({ params }: Props) {
   return (
     <>
       <aside className='px-2'>
-        <Sidebar boardId={boardId} userBoards={userBoards} />
+        <Sidebar userId={userId} boardId={boardId} userBoards={userBoards} />
       </aside>
       <section>
         <NotesBoard userId={userId} board={board} />

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { FaRegStar, FaStar } from 'react-icons/fa';
 
-import { starBoard } from '@/app/actions/notesActions';
+import { starBoard } from '@/app/actions/actions';
 import { UserBoard } from '@/app/types/user';
 
 type Props = {

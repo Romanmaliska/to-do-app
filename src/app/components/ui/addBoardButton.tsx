@@ -10,7 +10,7 @@ import {
   PopoverTrigger,
 } from '@/app/components/ui/popover';
 
-import { createNewBoard } from '../../actions/notesActions';
+import { createNewBoard } from '../../actions/actions';
 
 type Props = {
   userId: string | null;

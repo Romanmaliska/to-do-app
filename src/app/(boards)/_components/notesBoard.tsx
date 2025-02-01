@@ -13,7 +13,7 @@ import { useParams } from 'next/navigation';
 import { useMemo, useOptimistic, useState, useTransition } from 'react';
 
 import NotesColumn from '@/app/(boards)/_components/notesColumn';
-import { updateColumns } from '@/app/actions/notesActions';
+import { updateColumns } from '@/app/actions/actions';
 import type { UserBoard, UserColumn, UserNote } from '@/app/types/user';
 
 import AddColumnButton from './addColumnButton';
