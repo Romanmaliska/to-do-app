@@ -45,7 +45,7 @@ export default async function Home() {
         </SignedOut>
       </div>
       <div className='hidden md:flex items-center place-content-center w-1/2'>
-        <Image src='/preview.png' alt='hero' width={800} height={800} />
+        <Image src='/hero.png' alt='hero' width={320} height={320} priority />
       </div>
     </div>
   );

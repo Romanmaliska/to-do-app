@@ -4,6 +4,8 @@ import { SignedIn, UserButton } from '@clerk/nextjs';
 import { auth } from '@clerk/nextjs/server';
 import Link from 'next/link';
 
+import AddNewBoard from '@/app/components/ui/addBoardButton';
+
 export default async function Navbar() {
   const { userId } = await auth();
 
@@ -13,7 +15,10 @@ export default async function Navbar() {
         <h1 className='font-extrabold'>Another Todo App</h1>
       </Link>
       <SignedIn>
-        <UserButton />
+        <div className='flex gap-8'>
+          <AddNewBoard userId={userId} isInNavbar />
+          <UserButton />
+        </div>
       </SignedIn>
     </nav>
   );
