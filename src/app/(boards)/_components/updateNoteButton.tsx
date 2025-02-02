@@ -1,10 +1,11 @@
 import { useParams } from 'next/navigation';
-import { FocusEvent, useTransition } from 'react';
+import { useTransition } from 'react';
 
-import { updateColumns } from '../../actions/actions';
-import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
-import { UserColumn, UserNote } from '../../types/user';
+import { updateColumns } from '@/app/actions/actions';
+import { Button } from '@/app/components/ui/button';
+import { Input } from '@/app/components/ui/input';
+import { useOutsideClick } from '@/app/hooks/useOutsideClick';
+import { UserColumn, UserNote } from '@/app/types/user';
 
 type Props = {
   columns: UserColumn[];
@@ -25,54 +26,49 @@ export default function UpdateNoteButton({
 }: Props) {
   const [_, startTransition] = useTransition();
   const { boardId } = useParams<{ boardId: string }>();
+  const ref = useOutsideClick(() => setIsNoteUpdated(false));
 
-  const handleBlur = (event: FocusEvent<HTMLInputElement>) => {
-    event.preventDefault();
+  const addNote = (formData: FormData) => {
     setIsNoteUpdated(false);
 
-    const relatedTarget = (event.relatedTarget as HTMLElement)?.id;
+    const noteText = formData.get('noteText') as string;
+    if (!noteText || note.noteText === noteText) return;
 
-    if (relatedTarget === 'saveButton') {
-      const noteText = (event.target as HTMLButtonElement).form?.noteText.value;
-      if (!noteText || note.noteText === noteText) return;
+    const newNote = { ...note, noteText };
+    const newColumns = columns.map((col) => {
+      if (col.columnId === columnId) {
+        return {
+          ...col,
+          notes: col.notes.map((n) => (n.noteId === note.noteId ? newNote : n)),
+        };
+      }
+      return col;
+    });
 
-      const newNote = { ...note, noteText };
-      const newColumns = columns.map((col) => {
-        if (col.columnId === columnId) {
-          return {
-            ...col,
-            notes: col.notes.map((n) =>
-              n.noteId === note.noteId ? newNote : n,
-            ),
-          };
-        }
-        return col;
-      });
+    startTransition(async () => {
+      setOptimisticColumns(newColumns);
+      await updateColumns(userId, boardId, newColumns);
+    });
+  };
 
-      startTransition(async () => {
-        setOptimisticColumns(newColumns);
-        await updateColumns(userId, boardId, newColumns);
-      });
-    }
+  const deleteNote = () => {
+    setIsNoteUpdated(false);
 
-    if (relatedTarget === 'deleteButton') {
-      const newColumns = columns.map((col) => ({
-        ...col,
-        notes: col.notes.filter((n) => n.noteId !== note.noteId),
-      }));
+    const newColumns = columns.map((col) => ({
+      ...col,
+      notes: col.notes.filter((n) => n.noteId !== note.noteId),
+    }));
 
-      startTransition(async () => {
-        setOptimisticColumns(newColumns);
-        await updateColumns(userId, boardId, newColumns);
-      });
-    }
+    startTransition(async () => {
+      setOptimisticColumns(newColumns);
+      await updateColumns(userId, boardId, newColumns);
+    });
   };
 
   return (
-    <form>
+    <form ref={ref} action={addNote}>
       <Input
         className='mb-2 mt-1 border-0 rounded-md focus-visible:ring-blue'
-        onBlur={handleBlur}
         name='noteText'
         type='text'
         autoFocus
@@ -82,10 +78,14 @@ export default function UpdateNoteButton({
         autoComplete='off'
       ></Input>
       <div className='flex justify-between items-center gap-2'>
-        <Button className='bg-blue hover:bg-lighterBlue' id='saveButton'>
+        <Button
+          className='bg-blue hover:bg-lighterBlue'
+          type='submit'
+          formAction={addNote}
+        >
           Save
         </Button>
-        <Button variant='destructive' id='deleteButton'>
+        <Button variant='destructive' formAction={deleteNote}>
           Delete
         </Button>
       </div>

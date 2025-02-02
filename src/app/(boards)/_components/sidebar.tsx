@@ -14,7 +14,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/app/components/ui/tooltip';
-import { useStore } from '@/app/lib/store/store';
+import { useStore } from '@/app/store/store';
 import { UserBoard } from '@/app/types/user';
 
 type Props = {
