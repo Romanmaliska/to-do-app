@@ -1,4 +1,7 @@
+'use client';
+
 import { PopoverClose } from '@radix-ui/react-popover';
+import { useState } from 'react';
 import { BsPlus } from 'react-icons/bs';
 
 import { Button } from '@/app/components/ui/button';
@@ -18,6 +21,8 @@ type Props = {
 };
 
 export default function AddBoardButton({ userId, isInNavbar }: Props) {
+  const [inputValue, setInputValue] = useState('');
+
   if (!userId) return null;
 
   return (
@@ -57,10 +62,12 @@ export default function AddBoardButton({ userId, isInNavbar }: Props) {
                 type='text'
                 name='boardName'
                 minLength={1}
+                onChange={(e) => setInputValue(e.target.value)}
               />
             </div>
             <PopoverClose asChild>
               <Button
+                disabled={inputValue.length === 0}
                 className='bg-darkBlue text-white hover:bg-blue hover:text-white'
                 type='submit'
                 variant={'outline'}

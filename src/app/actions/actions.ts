@@ -58,7 +58,11 @@ export async function createNewBoard(userId: string, formData: FormData) {
   }
 }
 
-export async function deleteBoard(userId: string, boardId: string) {
+export async function deleteBoard(
+  userId: string,
+  boardId: string,
+  nextBoardId: string | null,
+) {
   try {
     await mongoDBclient
       .db('users')
@@ -68,7 +72,9 @@ export async function deleteBoard(userId: string, boardId: string) {
     console.log(e);
   }
 
-  redirect('/boards');
+  if (!nextBoardId) redirect('/boards');
+
+  redirect(`/board/${nextBoardId}`);
 }
 
 export async function getBoards(userId: string) {

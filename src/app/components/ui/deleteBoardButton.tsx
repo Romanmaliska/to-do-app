@@ -14,9 +14,15 @@ import { UserBoard } from '@/app/types/user';
 type Props = {
   userId: string;
   board: UserBoard;
+  boards?: UserBoard[];
 };
 
-export default function DeleteBoardButton({ userId, board }: Props) {
+export default function DeleteBoardButton({ userId, board, boards }: Props) {
+  const nextBoardId =
+    !boards || boards.length < 2
+      ? null
+      : boards.find((b) => b.boardId !== board.boardId)?.boardId || null;
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -38,12 +44,16 @@ export default function DeleteBoardButton({ userId, board }: Props) {
             </PopoverClose>
           </div>
           <PopoverClose asChild>
-            <Button
-              variant='destructive'
-              onClick={() => deleteBoard(userId, board.boardId)}
+            <form
+              action={deleteBoard.bind(
+                null,
+                userId,
+                board.boardId,
+                nextBoardId,
+              )}
             >
-              Delete Board
-            </Button>
+              <Button variant='destructive'>Delete Board</Button>
+            </form>
           </PopoverClose>
         </div>
       </PopoverContent>

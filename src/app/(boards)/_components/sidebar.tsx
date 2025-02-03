@@ -99,7 +99,11 @@ export default function Sidebar({ userId, userBoards, boardId }: Props) {
               {board.boardName}
             </Link>
             <div className={`flex justify-between place-items-center gap-2`}>
-              <DeleteBoardButton userId={userId} board={board} />
+              <DeleteBoardButton
+                userId={userId}
+                boards={userBoards}
+                board={board}
+              />
               {board.starred && <FaStar />}
             </div>
           </div>
