@@ -33,7 +33,7 @@ export default async function Home() {
               placeholder='Email'
               name={`email_address`}
             />
-            <div className='p-1 rounded-lg bg-gradient-to-r from-yellow from-10%  via-darkBlue via-40% to-red to-90% text-white'>
+            <div className='p-1 rounded-lg bg-linear-to-r from-yellow from-10%  via-darkBlue via-40% to-red to-90% text-white'>
               <Button
                 className='border-none bg-white hover:bg-grey text-black font-bold'
                 type='submit'

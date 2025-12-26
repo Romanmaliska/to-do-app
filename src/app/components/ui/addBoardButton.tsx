@@ -1,6 +1,5 @@
 'use client';
 
-import { PopoverClose } from '@radix-ui/react-popover';
 import { useState } from 'react';
 import { BsPlus } from 'react-icons/bs';
 
@@ -21,12 +20,17 @@ type Props = {
 };
 
 export default function AddBoardButton({ userId, isInNavbar }: Props) {
-  const [inputValue, setInputValue] = useState('');
+  const [open, setOpen] = useState(false);
 
   if (!userId) return null;
 
+  const handleSubmit = async (formData: FormData) => {
+    await createNewBoard(userId, formData);
+    setOpen(false);
+  };
+
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
           className={`flex gap-2 align-middle ${
@@ -49,10 +53,7 @@ export default function AddBoardButton({ userId, isInNavbar }: Props) {
           <div className='space-y-2'>
             <h4 className='font-medium leading-none'>Create new board</h4>
           </div>
-          <form
-            className='grid gap-4'
-            action={createNewBoard.bind(null, userId)}
-          >
+          <form className='grid gap-4' action={handleSubmit}>
             <div className='flex flex-col gap-4'>
               <Label htmlFor='boardName'>Board name</Label>
               <Input
@@ -62,19 +63,16 @@ export default function AddBoardButton({ userId, isInNavbar }: Props) {
                 type='text'
                 name='boardName'
                 minLength={1}
-                onChange={(e) => setInputValue(e.target.value)}
+                required
               />
             </div>
-            <PopoverClose asChild>
-              <Button
-                disabled={inputValue.length === 0}
-                className='bg-darkBlue text-white hover:bg-blue hover:text-white'
-                type='submit'
-                variant={'outline'}
-              >
-                Create board
-              </Button>
-            </PopoverClose>
+            <Button
+              className='bg-darkBlue text-white hover:bg-blue hover:text-white'
+              variant={'outline'}
+              type='submit'
+            >
+              Create board
+            </Button>
           </form>
         </div>
       </PopoverContent>
